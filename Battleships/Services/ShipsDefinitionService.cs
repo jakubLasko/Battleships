@@ -1,4 +1,4 @@
-﻿using Battleships.Configuration.Entities;
+﻿using Battleships.Models.GameSetup;
 using Battleships.Services.Interfaces;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
@@ -15,7 +15,7 @@ namespace Battleships.Services
 
         public async Task<List<ShipTemplate>> LoadShipTemplatesAsync(CancellationToken cancellationToken)
         {
-            var shipsConfigPath = AppSettings.Value.ShipsConfigPath;
+            var shipsConfigPath = AppSettings.Value.ShipsTemplatesPath;
             if (!File.Exists(shipsConfigPath))
             {
                 Logger.LogError("Ships config file not found at path: {ShipsConfigPath}", shipsConfigPath);

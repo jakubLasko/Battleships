@@ -1,9 +1,7 @@
 ﻿using Battleships.Models;
 using Battleships.Models.DataTypes;
 using Battleships.Models.GameIO;
-using Battleships.Services;
 using Battleships.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -70,16 +68,16 @@ namespace Battleships.Controllers
             ArgumentNullException.ThrowIfNull(gameId);
             ArgumentNullException.ThrowIfNull(position);
 
-            // Shoot can be sync since it does we quick operation on in-memory data
+            // Shoot can be sync since it does only quick operation on in-memory data
             try
             {
-                if (!Guid.TryParse(gameId, out var gameGuid))
+                if (!Guid.TryParse(gameId, out Guid gameGuid))
                 {
                     logger.LogError($"Invalid game ID format: {gameId}");
                     return BadRequest("Invalid game ID format");
                 }
 
-                ShotResult result = battleshipsService.Shoot(gameGuid, position);
+                ShotResult result = battleshipsService.Shoot(new ShootData(gameGuid, position));
                 return Ok(result);
             }
             catch (KeyNotFoundException)

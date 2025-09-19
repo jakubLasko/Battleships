@@ -1,4 +1,4 @@
-﻿using Battleships.Configuration.Entities;
+﻿using Battleships.Models.GameSetup;
 
 namespace Battleships.Services.Interfaces
 {

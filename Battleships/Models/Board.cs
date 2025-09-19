@@ -1,6 +1,6 @@
-﻿using Battleships.Configuration.Entities;
-using Battleships.Models.DataTypes;
+﻿using Battleships.Models.DataTypes;
 using Battleships.Models.Enums;
+using Battleships.Models.GameSetup;
 
 namespace Battleships.Models
 {

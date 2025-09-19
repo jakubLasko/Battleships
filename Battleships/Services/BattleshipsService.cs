@@ -2,84 +2,85 @@
 using Battleships.Models.DataTypes;
 using Battleships.Models.GameIO;
 using Battleships.Services.Interfaces;
+using Battleships.Storages.Interfaces;
 
 namespace Battleships.Services
 {
-    public class BattleshipsService(
-        ILogger<BattleshipsService> logger, 
-        IShipsDefinitionService shipsDefinitionService)
-        : IBattleshipsService
+    public class BattleshipsService : IBattleshipsService
     {
-        protected ILogger<BattleshipsService> Logger { get; } = logger ?? throw new ArgumentNullException(nameof(logger));
-        protected IShipsDefinitionService ShipsDefinitionService { get; } = shipsDefinitionService ?? throw new ArgumentNullException(nameof(shipsDefinitionService));
+        private readonly ILogger<BattleshipsService> logger;
+        private readonly IShipsDefinitionService shipsDefinitionService;
+        private readonly IGameStorage gameStorage;
+
+        public BattleshipsService(ILogger<BattleshipsService> logger, IShipsDefinitionService shipsDefinitionService, IGameStorage gameStorage)
+        {
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.shipsDefinitionService = shipsDefinitionService ?? throw new ArgumentNullException(nameof(shipsDefinitionService));
+            this.gameStorage = gameStorage ?? throw new ArgumentNullException(nameof(gameStorage));
+        }
 
         public async Task<Game> StartGameAsync(GameStartData data, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(data);
 
-            Logger.LogDebug($"Starting new game with board size: {data.BoardSizeX}x{data.BoardSizeY}.");
+            logger.LogDebug($"Starting new game with board size: {data.BoardSizeX}x{data.BoardSizeY}.");
 
             try
             {
-                Logger.LogTrace("Loading ship templates.");
+                logger.LogTrace("Loading ship templates.");
 
-                var shipTemplates = await ShipsDefinitionService.LoadShipTemplatesAsync(cancellationToken);
+                var shipTemplates = await shipsDefinitionService.LoadShipTemplatesAsync(cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
 
                 if (shipTemplates.Any(s => s.Shape.Count == 0))
                     throw new ArgumentException("Invalid ship template - empty shape");
 
-                Logger.LogTrace($"Ship templates loaded: {shipTemplates.Count}");
+                logger.LogTrace($"Ship templates loaded: {shipTemplates.Count}");
 
-                Logger.LogTrace("Initializing new game instance.");
+                logger.LogTrace("Initializing new game instance.");
 
                 var game = new Game();
                 game.Initialize(data.FirstPlayer, data.SecondPlayer, new Vector2(data.BoardSizeX, data.BoardSizeY), shipTemplates);
 
-                Logger.LogTrace($"Initialization of game {game.Id} finished.");
+                logger.LogTrace($"Initialization of game {game.Id} finished.");
 
-                // TODO: will have to store the game somewhere - example
-                //activeGames[game.Id] = game;
+                gameStorage.AddGame(game);
 
-                Logger.LogTrace($"Starting game {game.Id}.");
+                logger.LogTrace($"Starting game {game.Id}.");
 
                 game.Start();
 
-                Logger.LogTrace($"Game {game.Id} started successfully.");
+                logger.LogTrace($"Game {game.Id} started successfully.");
 
                 return game;
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Failed to start new game.");
+                logger.LogError(ex, "Failed to start new game.");
                 throw;
             }
         }
 
-        public ShotResult Shoot(Guid gameId, Vector2 position)
+        public ShotResult Shoot(ShootData data)
         {
-            // TODO: I have to get active game from some kind of storage
-
-            /*if (!activeGames.TryGetValue(gameId, out var game))
-            {
-                Logger.LogError($"Game {gameId} not found.");
-                throw new KeyNotFoundException("Game not found.");
-            }*/
-
             try
             {
-                Logger.LogDebug($"Processing shot at position {position} in game {gameId}.");
+                Vector2 position = data.Position;
 
-                var result = game.Shoot(position);
+                logger.LogDebug($"Processing shot at position {position} in game {data.GameId}.");
 
-                Logger.LogInformation("Shot processed: {State} at {X},{Y} in game {GameId}",
-                    result.State, position.X, position.Y, gameId);
+                Game game = gameStorage.GetGame(data.GameId);
+                ShotResult result = game.Shoot(data.Position);
+
+                // TODO: handle end game and turn change logic
+
+                logger.LogInformation($"Shot processed: {result.State} at {position.X},{position.Y} in game {data.GameId}.");
 
                 return result;
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Error processing shot in game {GameId}", gameId);
+                logger.LogError(ex, $"Error processing shot in game {data.GameId}.");
                 throw;
             }
         }

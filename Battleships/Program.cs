@@ -1,6 +1,8 @@
 using Battleships;
 using Battleships.Services;
 using Battleships.Services.Interfaces;
+using Battleships.Storages;
+using Battleships.Storages.Interfaces;
 using NLog;
 using NLog.Web;
 
@@ -52,6 +54,10 @@ public class Program
 
         // Battleships service (main service to handle game logic)
         builder.Services.AddSingleton<IBattleshipsService, BattleshipsService>();
+
+        // In-memory game storage
+        builder.Services.AddMemoryCache();
+        builder.Services.AddSingleton<IGameStorage, GameStorage>();
 
         // Add services to the container.
         builder.Services.AddControllers();
