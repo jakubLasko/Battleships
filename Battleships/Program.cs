@@ -1,3 +1,9 @@
+using NLog;
+using NLog.Web;
+
+var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+logger.Debug("Program started.");
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
