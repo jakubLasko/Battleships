@@ -1,11 +1,14 @@
-﻿namespace Battleships.Models.Enums
+﻿using System.Text.Json.Serialization;
+
+namespace Battleships.Models.Enums
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum ShipType
     {
-        Carrier,    // Size 5
-        Battleship, // Size 4
-        Cruiser,    // Size 3
-        Submarine,  // Size 3
-        Destroyer   // Size 2
+        Carrier,    
+        Battleship, 
+        Cruiser,    
+        Submarine,
+        Destroyer
     }
 }

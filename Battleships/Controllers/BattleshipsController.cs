@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Battleships.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class BattleshipsController : ControllerBase
     {
@@ -20,6 +20,12 @@ namespace Battleships.Controllers
             this.battleshipsService = battleshipsService ?? throw new ArgumentNullException(nameof(battleshipsService));
         }
 
+        /// <summary>
+        /// Stars a new game of Battleships.
+        /// </summary>
+        /// <param name="data">GameStartData required for starting a new game.</param>
+        /// <param name="cancellationToken">The cancellation token used to prevent hanging.</param>
+        /// <returns></returns>
         [HttpPost]
         [ActionName("game/start")]
         public async Task<ActionResult<GameCreatedResult>> StartGameAsync([FromBody] GameStartData data, CancellationToken cancellationToken)
@@ -61,6 +67,12 @@ namespace Battleships.Controllers
             }
         }
 
+        /// <summary>
+        /// Processes a shot attempt in the specified game at the given position.
+        /// </summary>
+        /// <param name="gameId">The unique identifier of the game.</param>
+        /// <param name="position">The coordinates of the shot. Must be within the valid board boundaries.</param>
+        /// <returns>ShotResult with result of the shot and game state.</returns>
         [HttpPut]
         [ActionName("game/shoot/{gameId}")]
         public ActionResult<ShotResult> Shoot([FromRoute][Required] string gameId, [FromBody][Required] Vector2 position)
