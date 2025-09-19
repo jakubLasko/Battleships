@@ -47,8 +47,11 @@ public class Program
         // Settings
         builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(AppSettings)));
 
-        // Definition service
+        // Definition service (loads ship templates from configuration)
         builder.Services.AddSingleton<IShipsDefinitionService, ShipsDefinitionService>();
+
+        // Battleships service (main service to handle game logic)
+        builder.Services.AddSingleton<IBattleshipsService, BattleshipsService>();
 
         // Add services to the container.
         builder.Services.AddControllers();

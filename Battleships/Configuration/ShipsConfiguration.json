@@ -1,0 +1,133 @@
+{
+  "ships": [
+    {
+      "type": "Carrier",
+      "shape": [
+        {
+          "X": 0,
+          "Y": 0
+        },
+        {
+          "X": 1,
+          "Y": 0
+        },
+        {
+          "X": 2,
+          "Y": 0
+        },
+        {
+          "X": 3,
+          "Y": 0
+        },
+        {
+          "X": 4,
+          "Y": 0
+        }
+      ],
+      "count": 1,
+      "allowRotate": true
+    },
+    {
+      "type": "Battleship",
+      "shape": [
+        {
+          "X": 0,
+          "Y": 0
+        },
+        {
+          "X": 1,
+          "Y": 0
+        },
+        {
+          "X": 2,
+          "Y": 0
+        },
+        {
+          "X": 3,
+          "Y": 0
+        }
+      ],
+      "count": 1,
+      "allowRotate": true
+    },
+    {
+      "type": "Cruiser",
+      "shape": [
+        {
+          "X": 0,
+          "Y": 0
+        },
+        {
+          "X": 1,
+          "Y": 0
+        },
+        {
+          "X": 2,
+          "Y": 0
+        }
+      ],
+      "count": 1,
+      "allowRotate": true
+    },
+    {
+      "type": "Submarine",
+      "shape": [
+        {
+          "X": 0,
+          "Y": 0
+        },
+        {
+          "X": 1,
+          "Y": 0
+        },
+        {
+          "X": 2,
+          "Y": 0
+        }
+      ],
+      "count": 1,
+      "allowRotate": true
+    },
+    {
+      "type": "Destroyer",
+      "shape": [
+        {
+          "X": 0,
+          "Y": 0
+        },
+        {
+          "X": 1,
+          "Y": 0
+        }
+      ],
+      "count": 1,
+      "allowRotate": true
+    }
+    /*
+    {
+      "type": "LShapedShip",
+      "shape": [
+        { "X": 0, "Y": 0 },
+        { "X": 0, "Y": 1 },
+        { "X": 0, "Y": 2 },
+        { "X": 1, "Y": 2 },
+        { "X": 2, "Y": 2 }
+      ],
+      "count": 1,
+      "allowRotate": true
+    },
+    {
+      "type": "PlusShapedShip",
+      "shape": [
+        { "X": 1, "Y": 0 },
+        { "X": 0, "Y": 1 },
+        { "X": 1, "Y": 1 },
+        { "X": 2, "Y": 1 },
+        { "X": 1, "Y": 2 }
+      ],
+      "count": 1,
+      "allowRotate": true
+    }
+*/
+  ]
+}

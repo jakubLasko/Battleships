@@ -1,4 +1,4 @@
-﻿using Battleships.Configs;
+﻿using Battleships.Configuration.Entities;
 using Battleships.Models.DataTypes;
 using Battleships.Models.Enums;
 

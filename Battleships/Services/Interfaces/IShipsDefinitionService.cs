@@ -1,9 +1,9 @@
-﻿using Battleships.Configs;
+﻿using Battleships.Configuration.Entities;
 
 namespace Battleships.Services.Interfaces
 {
     public interface IShipsDefinitionService
     {
-        public List<ShipTemplate> GetShipTemplates();
+        public Task<List<ShipTemplate>> LoadShipTemplatesAsync(CancellationToken cancellationToken);
     }
 }

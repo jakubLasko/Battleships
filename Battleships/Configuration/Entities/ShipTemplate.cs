@@ -1,7 +1,7 @@
 ﻿using Battleships.Models.DataTypes;
 using Battleships.Models.Enums;
 
-namespace Battleships.Configs
+namespace Battleships.Configuration.Entities
 {
     public class ShipTemplate
     {

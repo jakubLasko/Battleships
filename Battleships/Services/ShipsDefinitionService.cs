@@ -1,6 +1,7 @@
-﻿using Battleships.Configs;
+﻿using Battleships.Configuration.Entities;
 using Battleships.Services.Interfaces;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace Battleships.Services
 {
@@ -12,7 +13,7 @@ namespace Battleships.Services
         protected ILogger<ShipsDefinitionService> Logger { get; } = logger ?? throw new ArgumentNullException(nameof(logger));
         protected IOptions<AppSettings> AppSettings { get; } = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
 
-        public List<ShipTemplate> GetShipTemplates()
+        public async Task<List<ShipTemplate>> LoadShipTemplatesAsync(CancellationToken cancellationToken)
         {
             var shipsConfigPath = AppSettings.Value.ShipsConfigPath;
             if (!File.Exists(shipsConfigPath))
@@ -22,8 +23,16 @@ namespace Battleships.Services
             }
             try
             {
-                var json = File.ReadAllText(shipsConfigPath);
-                var shipTemplates = System.Text.Json.JsonSerializer.Deserialize<List<ShipTemplate>>(json);
+                // Using guarantees disposal of the stream
+                await using var fileStream = File.OpenRead(shipsConfigPath);
+
+                // Deserialize the JSON content to a list of ShipTemplate objects
+                var shipTemplates = await JsonSerializer.DeserializeAsync<List<ShipTemplate>>(
+                    fileStream,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
+                    cancellationToken
+                );
+
                 if (shipTemplates == null || shipTemplates.Count == 0)
                 {
                     Logger.LogError("No ship templates found in config file at path: {ShipsConfigPath}", shipsConfigPath);
