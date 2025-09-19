@@ -23,7 +23,7 @@ namespace Battleships.Controllers
 
         [HttpPut]
         [ActionName("game/shoot/{gameId}")]
-        public ActionResult<ShootResult> Shoot([FromRoute][Required] string gameId, [FromBody][Required] Position position)
+        public ActionResult<ShootResult> Shoot([FromRoute][Required] string gameId, [FromBody][Required] Vector2 position)
         {
             ArgumentNullException.ThrowIfNull(gameId);
             ArgumentNullException.ThrowIfNull(position);
