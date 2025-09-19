@@ -2,7 +2,8 @@
 {
     public enum ShotState
     {
-        Miss,
-        Hit
+        Water,
+        Hit,
+        ShipSunk
     }
 }

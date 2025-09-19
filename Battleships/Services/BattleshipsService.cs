@@ -56,6 +56,32 @@ namespace Battleships.Services
             }
         }
 
-        // TODO: Shoot logic
+        public ShotResult Shoot(Guid gameId, Vector2 position)
+        {
+            // TODO: I have to get active game from some kind of storage
+
+            /*if (!activeGames.TryGetValue(gameId, out var game))
+            {
+                Logger.LogError($"Game {gameId} not found.");
+                throw new KeyNotFoundException("Game not found.");
+            }*/
+
+            try
+            {
+                Logger.LogDebug($"Processing shot at position {position} in game {gameId}.");
+
+                var result = game.Shoot(position);
+
+                Logger.LogInformation("Shot processed: {State} at {X},{Y} in game {GameId}",
+                    result.State, position.X, position.Y, gameId);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error processing shot in game {GameId}", gameId);
+                throw;
+            }
+        }
     }
 }

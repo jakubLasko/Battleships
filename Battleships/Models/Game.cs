@@ -1,6 +1,7 @@
 ﻿using Battleships.Configuration.Entities;
 using Battleships.Models.DataTypes;
 using Battleships.Models.Enums;
+using Battleships.Models.GameIO;
 
 namespace Battleships.Models
 {
@@ -54,6 +55,36 @@ namespace Battleships.Models
 
             CurrentTurn++;
             PlayerOnTurn = PlayerOnTurn == FirstPlayer ? SecondPlayer : FirstPlayer;
+        }
+
+        public ShotResult Shoot(Vector2 position)
+        {
+            if (State != GameState.InProgress)
+                throw new InvalidOperationException("Game is not in progress");
+
+            // TODO: not sure I wanna go into Board and call Shoot there
+            var shotState = Board.Shoot(position);
+
+            // Switch turns only on miss
+            if (shotState == ShotState.Water)
+            {
+                SwitchTurn();
+            }
+            else
+            {
+                // Update hits count
+                PlayerOnTurn.Hits++;
+            }
+
+            // Check if game is finished
+            if (Board.AllShipsSunk())
+            {
+                State = GameState.Finished;
+
+                // TODO: End active game
+            }
+
+            return new ShotResult(Id.ToString(), shotState, State);
         }
     }
 }

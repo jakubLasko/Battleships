@@ -24,6 +24,8 @@ namespace Battleships.Models
             }
         }
 
+        #region Public methods
+
         public bool AllShipsSunk() => Ships.All(s => s.IsSunk);
 
         public void PlaceShipsRandomly(List<ShipTemplate> shipTemplates)
@@ -78,9 +80,45 @@ namespace Battleships.Models
                 }
 
                 if (!placed)
-                    throw new Exception($"Could not place ship of type {shipTemplate.Type}");
+                    throw new Exception($"Could not place ship of type {shipTemplate.Type}.");
             }
         }
+
+        public ShotState Shoot(Vector2 position)
+        {
+            if (position.X < 0 || position.X >= Size.X || position.Y < 0 || position.Y >= Size.Y)
+                throw new ArgumentOutOfRangeException(nameof(position), "Shot position is outside the board.");
+
+            // Lookup cell
+            Cell cell = Grid[position.X, position.Y];
+
+            switch (cell.State)
+            {
+                case CellState.Water:
+                    {
+                        cell.State = CellState.Miss;
+                        return ShotState.Water;
+                    }
+                case CellState.Ship:
+                    {
+                        cell.State = CellState.Hit;
+
+                        Ship ship = Ships.First(s => s.Id == cell.ShipId);
+                        ship.Hits.Add(position);
+
+                        return ship.IsSunk ? ShotState.ShipSunk : ShotState.Hit;
+                    }
+                case CellState.Hit:
+                case CellState.Miss:
+                    throw new InvalidOperationException("This position was already shot at.");
+                default:
+                    throw new InvalidOperationException("Unknown cell state.");
+            }
+        }
+
+        #endregion Public methods
+
+        #region Helper methods
 
         // Rotation helper
         private List<Vector2> RotateShape(List<Vector2> shape, int rotation)
@@ -131,5 +169,7 @@ namespace Battleships.Models
             }
             return true;
         }
+
+        #endregion Helper methods
     }
 }

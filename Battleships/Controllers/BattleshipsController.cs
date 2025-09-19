@@ -65,14 +65,43 @@ namespace Battleships.Controllers
 
         [HttpPut]
         [ActionName("game/shoot/{gameId}")]
-        public ActionResult<ShootResult> Shoot([FromRoute][Required] string gameId, [FromBody][Required] Vector2 position)
+        public ActionResult<ShotResult> Shoot([FromRoute][Required] string gameId, [FromBody][Required] Vector2 position)
         {
             ArgumentNullException.ThrowIfNull(gameId);
             ArgumentNullException.ThrowIfNull(position);
 
             // Shoot can be sync since it does we quick operation on in-memory data
+            try
+            {
+                if (!Guid.TryParse(gameId, out var gameGuid))
+                {
+                    logger.LogError($"Invalid game ID format: {gameId}");
+                    return BadRequest("Invalid game ID format");
+                }
 
-            return Ok(new ShootResult("Test"));
+                ShotResult result = battleshipsService.Shoot(gameGuid, position);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException)
+            {
+                logger.LogError($"Game not found: {gameId}");
+                return NotFound("Game not found");
+            }
+            catch (InvalidOperationException ex)
+            {
+                logger.LogWarning($"Invalid shot attempt: {ex.Message}");
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                logger.LogWarning($"Shot outside board: {ex.Message}");
+                return BadRequest("Shot position is outside the board");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error processing shot");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing the shot");
+            }
         }
     }
 }
