@@ -28,7 +28,7 @@ namespace Battleships.Models
 
         public bool AllShipsSunk() => Ships.All(s => s.IsSunk);
 
-        public void PlaceShipsRandomly(List<ShipTemplate> shipTemplates)
+        public void PlaceShipsRandomly(List<ShipDefinition> shipTemplates)
         {
             Random rng = new Random();
 

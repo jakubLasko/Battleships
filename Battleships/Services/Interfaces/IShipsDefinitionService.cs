@@ -4,6 +4,6 @@ namespace Battleships.Services.Interfaces
 {
     public interface IShipsDefinitionService
     {
-        public Task<List<ShipTemplate>> LoadShipTemplatesAsync(CancellationToken cancellationToken);
+        public Task<List<ShipDefinition>> LoadShipDefinitionsAsync(CancellationToken cancellationToken);
     }
 }

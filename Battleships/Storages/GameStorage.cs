@@ -48,11 +48,5 @@ namespace Battleships.Storages
 
             return true;
         }
-
-        public void CleanupInactiveGames()
-        {
-            // IMemoryCache handles cleanup automatically based on cache options
-            logger.LogInformation("Cleanup handled by IMemoryCache");
-        }
     }
 }

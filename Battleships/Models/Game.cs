@@ -9,28 +9,33 @@ namespace Battleships.Models
     {
         public Guid Id { get; } = Guid.NewGuid();
         public GameState State { get; private set; } = GameState.NotStarted;
-        public Player FirstPlayer { get; private set; }
-        public Player SecondPlayer { get; private set; }
-        public Board Board { get; private set; }
+        public Player Player { get; private set; }
+        public Player Opponent { get; private set; }
+        public Board PlayerBoard { get; private set; }
+        public Board OpponentBoard { get; private set; }
         public int CurrentTurn { get; private set; }
         public Player PlayerOnTurn { get; private set; }
         public bool IsInitialized { get; private set; }
 
-        public void Initialize(Player firstPlayer, Player secondPlayer, Vector2 boardSize, List<ShipTemplate> shipTemplates)
+        public void Initialize(Player player, Player opponent, Vector2 boardSize, List<ShipDefinition> shipDefinitions)
         {
             if (State != GameState.NotStarted)
                 throw new InvalidOperationException("Game has already been initialized");
 
-            FirstPlayer = firstPlayer ?? throw new ArgumentNullException(nameof(firstPlayer));
-            SecondPlayer = secondPlayer ?? throw new ArgumentNullException(nameof(secondPlayer));
+            Player = player ?? throw new ArgumentNullException(nameof(player));
+            Opponent = opponent ?? throw new ArgumentNullException(nameof(opponent));
 
-            // Prepare Board
-            Board = new Board(boardSize);
-            Board.PlaceShipsRandomly(shipTemplates);
+            // Prepare Player board
+            PlayerBoard = new Board(boardSize);
+            PlayerBoard.PlaceShipsRandomly(shipDefinitions);
+
+            // Prepare Opponent board
+            OpponentBoard = new Board(boardSize);
+            OpponentBoard.PlaceShipsRandomly(shipDefinitions);
 
             // Set initial turn
             CurrentTurn = 1;
-            PlayerOnTurn = FirstPlayer;
+            PlayerOnTurn = Player;
 
             IsInitialized = true;
         }
@@ -46,15 +51,13 @@ namespace Battleships.Models
             State = GameState.InProgress;
         }
 
-
-        // TODO: Players switch turn only if the shot was a miss
         public void SwitchTurn()
         {
             if (State != GameState.InProgress)
                 throw new InvalidOperationException("Game is not in progress");
 
             CurrentTurn++;
-            PlayerOnTurn = PlayerOnTurn == FirstPlayer ? SecondPlayer : FirstPlayer;
+            PlayerOnTurn = PlayerOnTurn == Player ? Opponent : Player;
         }
 
         public ShotResult Shoot(Vector2 position)
@@ -62,26 +65,19 @@ namespace Battleships.Models
             if (State != GameState.InProgress)
                 throw new InvalidOperationException("Game is not in progress");
 
-            // TODO: not sure I wanna go into Board and call Shoot there
-            var shotState = Board.Shoot(position);
+            Board board = PlayerOnTurn == Player ? OpponentBoard : PlayerBoard;
+            ShotState shotState = board.Shoot(position);
 
             // Switch turns only on miss
             if (shotState == ShotState.Water)
             {
                 SwitchTurn();
             }
-            else
-            {
-                // Update hits count
-                PlayerOnTurn.Hits++;
-            }
 
             // Check if game is finished
-            if (Board.AllShipsSunk())
+            if (PlayerBoard.AllShipsSunk())
             {
                 State = GameState.Finished;
-
-                // TODO: End active game
             }
 
             return new ShotResult(Id.ToString(), shotState, State);

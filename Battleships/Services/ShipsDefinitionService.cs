@@ -16,9 +16,17 @@ namespace Battleships.Services
             this.appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
         }
 
-        public async Task<List<ShipTemplate>> LoadShipTemplatesAsync(CancellationToken cancellationToken)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// Note: This is wasteful since we have to read and deserialize the file every time.
+        /// Better approach would be to read it once and cache the result, but this is simpler for now.
+        public async Task<List<ShipDefinition>> LoadShipDefinitionsAsync(CancellationToken cancellationToken)
         {
-            var shipsConfigPath = appSettings.Value.ShipsTemplatesPath;
+            var shipsConfigPath = appSettings.Value.ShipsDefinitionPath;
             if (!File.Exists(shipsConfigPath))
             {
                 logger.LogError($"Ships config file not found at path: {shipsConfigPath}.");
@@ -30,7 +38,7 @@ namespace Battleships.Services
                 await using FileStream fileStream = File.OpenRead(shipsConfigPath);
 
                 // Deserialize the JSON content to a list of ShipTemplate objects
-                List<ShipTemplate>? shipTemplates = await JsonSerializer.DeserializeAsync<List<ShipTemplate>>(
+                List<ShipDefinition>? shipTemplates = await JsonSerializer.DeserializeAsync<List<ShipDefinition>>(
                     fileStream,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
                     cancellationToken

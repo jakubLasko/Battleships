@@ -7,6 +7,5 @@ namespace Battleships.Storages.Interfaces
         void AddGame(Game game);
         Game GetGame(Guid gameId);
         bool RemoveGame(Guid gameId);
-        void CleanupInactiveGames();
     }
 }

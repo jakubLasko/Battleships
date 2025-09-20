@@ -3,7 +3,7 @@ using Battleships.Models.Enums;
 
 namespace Battleships.Models.GameSetup
 {
-    public class ShipTemplate
+    public class ShipDefinition
     {
         public ShipType Type { get; set; }
         public List<Vector2> Shape { get; set; } = [];

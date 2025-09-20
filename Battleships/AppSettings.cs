@@ -2,6 +2,6 @@
 {
     public class AppSettings
     {
-        public string ShipsTemplatesPath { get; set; }
+        public string ShipsDefinitionPath { get; set; }
     }
 }

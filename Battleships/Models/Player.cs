@@ -6,6 +6,5 @@ namespace Battleships.Models
     {
         [Required]
         public string Name { get; set; }
-        public int Hits { get; set; }
     }
 }

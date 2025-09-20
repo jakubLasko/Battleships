@@ -1,5 +1,6 @@
 ﻿using Battleships.Models;
 using Battleships.Models.DataTypes;
+using Battleships.Models.Enums;
 using Battleships.Models.GameIO;
 using Battleships.Services.Interfaces;
 using Battleships.Storages.Interfaces;
@@ -29,18 +30,18 @@ namespace Battleships.Services
             {
                 logger.LogTrace("Loading ship templates.");
 
-                var shipTemplates = await shipsDefinitionService.LoadShipTemplatesAsync(cancellationToken);
+                var shipDefinitions = await shipsDefinitionService.LoadShipDefinitionsAsync(cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (shipTemplates.Any(s => s.Shape.Count == 0))
+                if (shipDefinitions.Any(s => s.Shape.Count == 0))
                     throw new ArgumentException("Invalid ship template - empty shape");
 
-                logger.LogTrace($"Ship templates loaded: {shipTemplates.Count}");
+                logger.LogTrace($"Ship templates loaded: {shipDefinitions.Count}");
 
                 logger.LogTrace("Initializing new game instance.");
 
-                var game = new Game();
-                game.Initialize(data.FirstPlayer, data.SecondPlayer, new Vector2(data.BoardSizeX, data.BoardSizeY), shipTemplates);
+                Game game = new Game();
+                game.Initialize(data.FirstPlayer, data.SecondPlayer, new Vector2(data.BoardSizeX, data.BoardSizeY), shipDefinitions);
 
                 logger.LogTrace($"Initialization of game {game.Id} finished.");
 
@@ -72,9 +73,15 @@ namespace Battleships.Services
                 Game game = gameStorage.GetGame(data.GameId);
                 ShotResult result = game.Shoot(data.Position);
 
-                // TODO: handle end game and turn change logic
+                if (game.State == GameState.Finished)
+                {
+                    logger.LogDebug($"Game {data.GameId} finished. Winner: {game.PlayerOnTurn.Name}");
 
-                logger.LogInformation($"Shot processed: {result.State} at {position.X},{position.Y} in game {data.GameId}.");
+                    // Game cleanup
+                    gameStorage.RemoveGame(data.GameId);
+                }
+
+                logger.LogDebug($"Shot processed: {result.State} at {position.X},{position.Y} in game {data.GameId}.");
 
                 return result;
             }
