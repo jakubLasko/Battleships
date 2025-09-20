@@ -15,7 +15,32 @@ public class Program
         {
             logger.Debug("init main");
             
-            var builder = CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder(args);
+
+            // Settings
+            builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(AppSettings)));
+
+            // Definition service (loads ship templates from configuration)
+            builder.Services.AddSingleton<IShipsDefinitionService, ShipsDefinitionService>();
+
+            // Battleships service (main service to handle game logic)
+            builder.Services.AddSingleton<IBattleshipsService, BattleshipsService>();
+
+            // In-memory game storage
+            builder.Services.AddMemoryCache();
+            builder.Services.AddSingleton<IGameStorage, GameStorage>();
+
+            // Add services to the container.
+            builder.Services.AddControllers();
+
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
+            // Logger
+            builder.Logging.ClearProviders();
+            builder.Host.UseNLog();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -40,36 +65,5 @@ public class Program
             // Ensure to flush and stop internal timers/threads before application-exit
             LogManager.Shutdown();
         }
-    }
-
-    public static WebApplicationBuilder CreateBuilder(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
-
-        // Settings
-        builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(AppSettings)));
-
-        // Definition service (loads ship templates from configuration)
-        builder.Services.AddSingleton<IShipsDefinitionService, ShipsDefinitionService>();
-
-        // Battleships service (main service to handle game logic)
-        builder.Services.AddSingleton<IBattleshipsService, BattleshipsService>();
-
-        // In-memory game storage
-        builder.Services.AddMemoryCache();
-        builder.Services.AddSingleton<IGameStorage, GameStorage>();
-
-        // Add services to the container.
-        builder.Services.AddControllers();
-
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-
-        // Logger
-        builder.Logging.ClearProviders();
-        builder.Host.UseNLog();
-
-        return builder;
     }
 }

@@ -2,6 +2,9 @@
 
 namespace Battleships.Models.Enums
 {
+    /// <summary>
+    /// Defines the types of ships available in the game.
+    /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum ShipType
     {

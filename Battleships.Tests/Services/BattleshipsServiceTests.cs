@@ -46,8 +46,8 @@ namespace Battleships.Tests.Services
         {
             var gameStartData = new GameStartData
             {
-                FirstPlayer = new Player { Name = "Player1" },
-                SecondPlayer = new Player { Name = "Player2" },
+                Player = new Player("Player1"),
+                Opponent = new Player("Player2"),
                 BoardSizeX = 10,
                 BoardSizeY = 10
             };
@@ -77,7 +77,7 @@ namespace Battleships.Tests.Services
             var game = CreateGame();
             var waterCellPosition = Common.FindWaterCell(game.OpponentBoard.Grid);
 
-            var shootData = new ShootData(game.Id, waterCellPosition);
+            var shootData = new ShootData() { GameId = game.Id, Position = waterCellPosition };
             var result = service.Shoot(shootData);
 
             Assert.That(result.State, Is.EqualTo(ShotState.Water));
@@ -93,7 +93,11 @@ namespace Battleships.Tests.Services
             var game = CreateGame();
             var ship = game.OpponentBoard.Ships.First(x => !x.IsSunk);
 
-            var shootData = new ShootData(game.Id, ship.Cells.First(c => !ship.Hits.Any(h => h == c)));
+            var shootData = new ShootData()
+            {
+                GameId = game.Id,
+                Position = ship.Cells.First(c => !ship.Hits.Any(h => h == c))
+            };
 
             var result = service.Shoot(shootData);
 
@@ -114,7 +118,7 @@ namespace Battleships.Tests.Services
             {
                 foreach (var cell in ship.Cells)
                 {
-                    var shootData = new ShootData(game.Id, cell);
+                    var shootData = new ShootData() { GameId = game.Id, Position = cell };
                     shotResult = service.Shoot(shootData);
                 }
             }
@@ -131,7 +135,11 @@ namespace Battleships.Tests.Services
             var game = CreateGame();
 
             // Player shoot a miss to switch turn to opponent
-            var playerShot = service.Shoot(new ShootData(game.Id, Common.FindWaterCell(game.OpponentBoard.Grid)));
+            var playerShot = service.Shoot(new ShootData()
+            {
+                GameId = game.Id,
+                Position = Common.FindWaterCell(game.OpponentBoard.Grid)
+            });
 
             Assert.That(playerShot.State, Is.EqualTo(ShotState.Water));
             Assert.That(playerShot.GameState, Is.EqualTo(GameState.InProgress));
@@ -142,7 +150,7 @@ namespace Battleships.Tests.Services
             {
                 foreach (var cell in ship.Cells)
                 {
-                    var shootData = new ShootData(game.Id, cell);
+                    var shootData = new ShootData() { GameId = game.Id, Position = cell };
                     shotResult = service.Shoot(shootData);
                 }
             }
@@ -165,8 +173,8 @@ namespace Battleships.Tests.Services
 
             var game = new Game();
             game.Initialize(
-                new Player { Name = "Player1" },
-                new Player { Name = "Player2" },
+                new Player("Player1"),
+                new Player("Player2"),
                 new Vector2(10, 10),
                 shipDefinitions
             );

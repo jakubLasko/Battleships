@@ -32,13 +32,13 @@ namespace Battleships.Controllers
         {
             ArgumentNullException.ThrowIfNull(data);
 
-            if (data.FirstPlayer is null || string.IsNullOrWhiteSpace(data.FirstPlayer.Name))
+            if (data.Player is null || string.IsNullOrWhiteSpace(data.Player.Name))
             {
                 logger.LogError("First player is missing or has no name.");
                 return BadRequest("First player is required and must have a name.");
             }
 
-            if (data.SecondPlayer is null || string.IsNullOrWhiteSpace(data.SecondPlayer.Name))
+            if (data.Opponent is null || string.IsNullOrWhiteSpace(data.Opponent.Name))
             {
                 logger.LogError("Second player is missing or has no name.");
                 return BadRequest("Second player is required and must have a name.");
@@ -53,7 +53,7 @@ namespace Battleships.Controllers
                     return StatusCode(StatusCodes.Status500InternalServerError, "Failed to create game.");
                 }
 
-                return Ok(new GameCreatedResult(game.Id.ToString()));
+                return Ok(new GameCreatedResult() { GameId = game.Id.ToString() });
             }
             catch (OperationCanceledException)
             {
@@ -89,7 +89,12 @@ namespace Battleships.Controllers
                     return BadRequest("Invalid game ID format");
                 }
 
-                ShotResult result = battleshipsService.Shoot(new ShootData(gameGuid, position));
+                ShotResult result = battleshipsService.Shoot(new ShootData()
+                { 
+                    GameId = gameGuid,
+                    Position = position
+                });
+
                 return Ok(result);
             }
             catch (KeyNotFoundException)

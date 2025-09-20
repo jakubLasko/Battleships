@@ -4,13 +4,25 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Battleships.Models.GameIO
 {
-    public struct ShotResult(string gameId, ShotState state, GameState gameState)
+    /// <summary>
+    /// Represents the result of a shot in a game, including the current game state and the outcome of the shot.
+    /// Immutable struct.
+    /// </summary>
+    public struct ShotResult
     {
-        [Required]
-        public string GameId { get; } = gameId;
-        [Required]
-        public ShotState State { get; } = state;
-        [Required]
-        public GameState GameState { get; } = gameState;
+        /// <summary>
+        /// Gets the unique identifier of the game.
+        /// </summary>
+        required public string GameId { get; init; }
+
+        /// <summary>
+        /// Gets the state of the shot.
+        /// </summary>
+        required public ShotState State { get; init; }
+
+        /// <summary>
+        /// Gets the current state of the game.
+        /// </summary>
+        required public GameState GameState { get; init; }
     }
 }

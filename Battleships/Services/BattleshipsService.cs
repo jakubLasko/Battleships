@@ -41,7 +41,7 @@ namespace Battleships.Services
                 logger.LogTrace("Initializing new game instance.");
 
                 Game game = new Game();
-                game.Initialize(data.FirstPlayer, data.SecondPlayer, new Vector2(data.BoardSizeX, data.BoardSizeY), shipDefinitions);
+                game.Initialize(data.Player, data.Opponent, new Vector2(data.BoardSizeX, data.BoardSizeY), shipDefinitions);
 
                 logger.LogTrace($"Initialization of game {game.Id} finished.");
 

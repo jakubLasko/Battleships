@@ -1,1 +1,20 @@
-﻿Add description of some design decisions, possible improvements, etc.
+﻿Here I explain some of the design decisions, possible improvements, and the reasoning behind certain choices made in the codebase.
+
+BattleshipsController
+	- StartGameAsync
+		- Since it contains some I/O bound operations, it is marked as async. To make it responsive and not block the thread.
+	- Shoot
+		- This method is synchronous because it performs quick operations that do not involve I/O-bound tasks, ensuring low latency for user interactions.
+
+ShipsDefinitionService
+	- During game creation it always reads the ship definitions from a JSON file.
+	- Improvement: Consider caching the ship definitions in memory to avoid repeated file reads, which can improve performance.
+
+Tests
+	- Base tests were implemented to cover the main functionalities of the game, including game creation, shooting mechanics, and some edge cases.
+	- Improvement: Add more tests to unsure integrity of all logic pieces and robustness.
+
+General
+	- There is eternal discussion about vars vs explicit types. I used some vars where it was obvious what type it is, otherwise I used explicit types.
+		With codestyle config it can be enforced and I don't mind eitherway.
+		

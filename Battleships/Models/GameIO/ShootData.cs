@@ -1,13 +1,21 @@
 ﻿using Battleships.Models.DataTypes;
-using System.ComponentModel.DataAnnotations;
 
 namespace Battleships.Models.GameIO
 {
-    public struct ShootData(Guid gameId, Vector2 position)
+    /// <summary>
+    /// Data required to perform a shoot action in an ongoing game of Battleships.
+    /// Immutable struct.
+    /// </summary>
+    public struct ShootData
     {
-        [Required]
-        public Guid GameId { get; } = gameId;
-        [Required]
-        public Vector2 Position { get; } = position;
+        /// <summary>
+        /// Gets the unique identifier of the game.
+        /// </summary>
+        required public Guid GameId { get; init; }
+
+        /// <summary>
+        /// Gets the position of the object in a 2D space.
+        /// </summary>
+        required public Vector2 Position { get; init; }
     }
 }

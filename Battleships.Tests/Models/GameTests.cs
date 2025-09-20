@@ -16,8 +16,8 @@ namespace Battleships.Tests.Models
         [SetUp]
         public void Setup()
         {
-            player = new Player { Name = "Player1" };
-            opponent = new Player { Name = "Player2" };
+            player = new Player("Player1");
+            opponent = new Player("Player2");
             boardSize = new Vector2(10, 10);
             shipDefinitions = Common.GetShipDefinitions();
         }

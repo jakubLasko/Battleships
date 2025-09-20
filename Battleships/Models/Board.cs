@@ -4,12 +4,31 @@ using Battleships.Models.GameSetup;
 
 namespace Battleships.Models
 {
+    /// <summary>
+    /// Represents a game board.
+    /// Manages the grid, ship placement, and shooting mechanics.
+    /// </summary>
     public class Board
     {
+        /// <summary>
+        /// Gets the size of the board.
+        /// </summary>
         public Vector2 Size { get; }
+
+        /// <summary>
+        /// Gets the two-dimensional array representing the grid of cells.
+        /// </summary>
         public Cell[,] Grid { get; }
+
+        /// <summary>
+        /// Gets the collection of ships currently on the board.
+        /// </summary>
         public List<Ship> Ships { get; } = [];
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Board"/> class with the specified board size.
+        /// </summary>
+        /// <param name="boardSize">The dimensions of the board, represented as a <see cref="Vector2"/></param>
         public Board(Vector2 boardSize)
         {
             Size = boardSize;
@@ -26,8 +45,15 @@ namespace Battleships.Models
 
         #region Public methods
 
+        /// <summary>
+        /// Determines whether all ships on the board have been sunk.
+        /// </summary>
         public bool AllShipsSunk() => Ships.All(s => s.IsSunk);
 
+        /// <summary>
+        /// Places ships randomly on the grid based on the provided ship templates.
+        /// </summary>
+        /// <param name="shipTemplates">A list of ship definitions to be placed on the board</param>
         public void PlaceShipsRandomly(List<ShipDefinition> shipTemplates)
         {
             Random rng = new Random();
@@ -84,6 +110,10 @@ namespace Battleships.Models
             }
         }
 
+        /// <summary>
+        /// Fires a shot at the specified position on the game board and updates the state of the targeted cell.
+        /// </summary>
+        /// <param name="position">The coordinates of the cell to target</param>
         public ShotState Shoot(Vector2 position)
         {
             if (position.X < 0 || position.X >= Size.X || position.Y < 0 || position.Y >= Size.Y)

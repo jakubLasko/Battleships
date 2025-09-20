@@ -2,10 +2,13 @@
 {
     /// <summary>
     /// Represents the result of creating a new game, including the unique identifier of the created game.
+    /// Immutable struct.
     /// </summary>
-    /// <param name="gameId">ID of created game</param>
-    public struct GameCreatedResult(string gameId)
+    public struct GameCreatedResult
     {
-        public string GameId { get; } = gameId;
+        /// <summary>
+        /// Gets the unique identifier of the game.
+        /// </summary>
+        required public string GameId { get; init; }
     }
 }
