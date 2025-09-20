@@ -1,4 +1,5 @@
-﻿using Battleships.Models.DataTypes;
+﻿using Battleships.Models;
+using Battleships.Models.DataTypes;
 using Battleships.Models.Enums;
 using Battleships.Models.GameSetup;
 
@@ -16,6 +17,22 @@ namespace Battleships.Tests
                 new() { Type = ShipType.Submarine, Shape = new List<Vector2> { new(0, 0), new(1, 0) }, Count = 2, AllowRotation = true },
                 new() { Type = ShipType.Destroyer, Shape = new List<Vector2> { new(0, 0) }, Count = 2, AllowRotation = true }
             };
+        }
+
+        public static Vector2 FindWaterCell(Cell[,] grid)
+        {
+            for (int x = 0; x < grid.GetLength(0); x++)
+            {
+                for (int y = 0; y < grid.GetLength(1); y++)
+                {
+                    if (grid[x, y].State == CellState.Water)
+                    {
+                        return new Vector2(x, y);
+                    }
+                }
+            }
+
+            throw new InvalidOperationException("No water cell found on the board");
         }
     }
 }

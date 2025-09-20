@@ -1,0 +1,1 @@
+﻿Add description of some design decisions, possible improvements, etc.

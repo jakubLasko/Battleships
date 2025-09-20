@@ -2,7 +2,6 @@
 using Battleships.Models.DataTypes;
 using Battleships.Models.Enums;
 using Battleships.Models.GameIO;
-using Battleships.Models.GameSetup;
 using Battleships.Services;
 using Battleships.Services.Interfaces;
 using Battleships.Storages.Interfaces;
@@ -76,7 +75,7 @@ namespace Battleships.Tests.Services
         public void ShootWaterTest()
         {
             var game = CreateGame();
-            var waterCellPosition = FindWaterCell(game.OpponentBoard.Grid);
+            var waterCellPosition = Common.FindWaterCell(game.OpponentBoard.Grid);
 
             var shootData = new ShootData(game.Id, waterCellPosition);
             var result = service.Shoot(shootData);
@@ -132,7 +131,7 @@ namespace Battleships.Tests.Services
             var game = CreateGame();
 
             // Player shoot a miss to switch turn to opponent
-            var playerShot = service.Shoot(new ShootData(game.Id, FindWaterCell(game.OpponentBoard.Grid)));
+            var playerShot = service.Shoot(new ShootData(game.Id, Common.FindWaterCell(game.OpponentBoard.Grid)));
 
             Assert.That(playerShot.State, Is.EqualTo(ShotState.Water));
             Assert.That(playerShot.GameState, Is.EqualTo(GameState.InProgress));
@@ -160,7 +159,7 @@ namespace Battleships.Tests.Services
         /// <returns>Fresh Game</returns>
         private Game CreateGame()
         {
-            // For test we force synchronous loading
+            // Note: For test we force synchronous loading
             // Later we could switch to async if needed
             var shipDefinitions = shipsDefinitionServiceMock.Object.LoadShipDefinitionsAsync(CancellationToken.None).GetAwaiter().GetResult();
 
@@ -179,22 +178,6 @@ namespace Battleships.Tests.Services
                 .Returns(game);
 
             return game;
-        }
-
-        private Vector2 FindWaterCell(Cell[,] grid)
-        {
-            for (int x = 0; x < grid.GetLength(0); x++)
-            {
-                for (int y = 0; y < grid.GetLength(1); y++)
-                {
-                    if (grid[x, y].State == CellState.Water)
-                    {
-                        return new Vector2(x, y);
-                    }
-                }
-            }
-
-            throw new InvalidOperationException("No water cell found on the board");
         }
     }
 }
