@@ -36,9 +36,11 @@ namespace Battleships.Tests
             // Setup default ship definitions
             var shipDefinitions = new List<ShipDefinition>
             {
+                new() { Type = ShipType.Carrier, Shape = new List<Vector2> { new(0, 0), new(1, 0), new(2, 0), new(3, 0), new(4, 0), new(2, 1) }, Count = 1, AllowRotation = true },
+                new() { Type = ShipType.Battleship, Shape = new List<Vector2> { new(1, 0), new(1, 1), new(1, 2), new(0, 1), new(2, 1) }, Count = 1, AllowRotation = true },
                 new() { Type = ShipType.Cruiser, Shape = new List<Vector2> { new(0, 0), new(1, 0), new(2, 0) }, Count = 1, AllowRotation = true },
-                new() { Type = ShipType.Destroyer, Shape = new List<Vector2> { new(0, 0) }, Count = 2, AllowRotation = true },
-                new() { Type = ShipType.Carrier, Shape = new List<Vector2> { new(0, 0), new(1, 0), new(2, 0), new(3, 0), new(4, 0), new(2, 1) }, Count = 1, AllowRotation = true }
+                new() { Type = ShipType.Submarine, Shape = new List<Vector2> { new(0, 0), new(1, 0) }, Count = 2, AllowRotation = true },
+                new() { Type = ShipType.Destroyer, Shape = new List<Vector2> { new(0, 0) }, Count = 2, AllowRotation = true }
             };
 
             // Setup mock to return ship definitions
@@ -88,6 +90,9 @@ namespace Battleships.Tests
 
             Assert.That(result.State, Is.EqualTo(ShotState.Water));
             Assert.That(result.GameState, Is.EqualTo(GameState.InProgress));
+
+            // Test passing turn
+            Assert.That(game.PlayerOnTurn, Is.EqualTo(game.Opponent));
         }
 
         [Test]
@@ -102,6 +107,9 @@ namespace Battleships.Tests
 
             Assert.That(result.State, Is.EqualTo(ShotState.Hit));
             Assert.That(result.GameState, Is.EqualTo(GameState.InProgress));
+
+            // Test continuation of turn
+            Assert.That(game.PlayerOnTurn, Is.EqualTo(game.Player));
         }
 
         [Test]
