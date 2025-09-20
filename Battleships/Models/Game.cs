@@ -68,16 +68,18 @@ namespace Battleships.Models
             Board board = PlayerOnTurn == Player ? OpponentBoard : PlayerBoard;
             ShotState shotState = board.Shoot(position);
 
-            // Switch turns only on miss
-            if (shotState == ShotState.Water)
-            {
-                SwitchTurn();
-            }
-
             // Check if game is finished
-            if (PlayerBoard.AllShipsSunk())
+            if (board.AllShipsSunk())
             {
                 State = GameState.Finished;
+            }
+            else
+            {
+                // Switch turns only on miss
+                if (shotState == ShotState.Water)
+                {
+                    SwitchTurn();
+                }
             }
 
             return new ShotResult(Id.ToString(), shotState, State);

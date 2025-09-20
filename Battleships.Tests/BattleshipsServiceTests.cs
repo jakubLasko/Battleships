@@ -72,7 +72,7 @@ namespace Battleships.Tests
         }
 
         [Test]
-        public void StartGameAsyncThrowTest()
+        public void StartGameAsyncEmptyTest()
         {
             Assert.ThrowsAsync<ArgumentNullException>(async () => await service.StartGameAsync(default, CancellationToken.None));
         }
@@ -104,8 +104,59 @@ namespace Battleships.Tests
             Assert.That(result.GameState, Is.EqualTo(GameState.InProgress));
         }
 
-        // TODO: methods for player one win and player 2 win
+        [Test]
+        public void PlayerWinTest()
+        {
+            var game = CreateGame();
 
+            ShotResult shotResult = default;
+            foreach (var ship in game.OpponentBoard.Ships)
+            {
+                foreach (var cell in ship.Cells)
+                {
+                    var shootData = new ShootData(game.Id, cell);
+                    shotResult = service.Shoot(shootData);
+                }
+            }
+
+            Assert.That(shotResult, Is.Not.EqualTo((ShotResult)default));
+            Assert.That(shotResult.State, Is.EqualTo(ShotState.ShipSunk));
+            Assert.That(shotResult.GameState, Is.EqualTo(GameState.Finished));
+            Assert.That(game.PlayerOnTurn, Is.EqualTo(game.Player));
+        }
+
+        [Test]
+        public void OpponentWinTest()
+        {
+            var game = CreateGame();
+
+            // Player shoot a miss to switch turn to opponent
+            var playerShot = service.Shoot(new ShootData(game.Id, FindWaterCell(game.OpponentBoard.Grid)));
+
+            Assert.That(playerShot.State, Is.EqualTo(ShotState.Water));
+            Assert.That(playerShot.GameState, Is.EqualTo(GameState.InProgress));
+            Assert.That(game.PlayerOnTurn, Is.EqualTo(game.Opponent));
+
+            ShotResult shotResult = default;
+            foreach (var ship in game.PlayerBoard.Ships)
+            {
+                foreach (var cell in ship.Cells)
+                {
+                    var shootData = new ShootData(game.Id, cell);
+                    shotResult = service.Shoot(shootData);
+                }
+            }
+
+            Assert.That(shotResult, Is.Not.EqualTo((ShotResult)default));
+            Assert.That(shotResult.State, Is.EqualTo(ShotState.ShipSunk));
+            Assert.That(shotResult.GameState, Is.EqualTo(GameState.Finished));
+            Assert.That(game.PlayerOnTurn, Is.EqualTo(game.Opponent));
+        }
+
+        /// <summary>
+        /// Creates fresh game for testing
+        /// </summary>
+        /// <returns>Fresh Game</returns>
         private Game CreateGame()
         {
             // For test we force synchronous loading
