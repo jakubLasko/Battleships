@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 
-namespace Battleships.Tests
+namespace Battleships.Tests.Services
 {
     [TestFixture]
     public class ShipsDefinitionServiceTests

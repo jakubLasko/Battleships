@@ -34,8 +34,8 @@ namespace Battleships.Models
 
             foreach (var shipTemplate in shipTemplates)
             {
-                bool placed = false;
-                for (int attempt = 0; attempt < 1000 && !placed; attempt++)
+                int placed = 0;
+                for (int attempt = 0; attempt < 1000 && placed < shipTemplate.Count; attempt++)
                 {
                     // Only apply rotation if allowed
                     int rotation = shipTemplate.AllowRotation ? rng.Next(4) * 90 : 0;
@@ -75,11 +75,11 @@ namespace Battleships.Models
                         }
 
                         Ships.Add(ship);
-                        placed = true;
+                        placed++;
                     }
                 }
 
-                if (!placed)
+                if (placed == 0)
                     throw new Exception($"Could not place ship of type {shipTemplate.Type}.");
             }
         }
@@ -167,6 +167,7 @@ namespace Battleships.Models
                     }
                 }
             }
+
             return true;
         }
 

@@ -9,7 +9,7 @@ using Battleships.Storages.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace Battleships.Tests
+namespace Battleships.Tests.Services
 {
     [TestFixture]
     public class BattleshipsServiceTests
@@ -34,14 +34,7 @@ namespace Battleships.Tests
             );
 
             // Setup default ship definitions
-            var shipDefinitions = new List<ShipDefinition>
-            {
-                new() { Type = ShipType.Carrier, Shape = new List<Vector2> { new(0, 0), new(1, 0), new(2, 0), new(3, 0), new(4, 0), new(2, 1) }, Count = 1, AllowRotation = true },
-                new() { Type = ShipType.Battleship, Shape = new List<Vector2> { new(1, 0), new(1, 1), new(1, 2), new(0, 1), new(2, 1) }, Count = 1, AllowRotation = true },
-                new() { Type = ShipType.Cruiser, Shape = new List<Vector2> { new(0, 0), new(1, 0), new(2, 0) }, Count = 1, AllowRotation = true },
-                new() { Type = ShipType.Submarine, Shape = new List<Vector2> { new(0, 0), new(1, 0) }, Count = 2, AllowRotation = true },
-                new() { Type = ShipType.Destroyer, Shape = new List<Vector2> { new(0, 0) }, Count = 2, AllowRotation = true }
-            };
+            var shipDefinitions = Common.GetShipDefinitions();
 
             // Setup mock to return ship definitions
             shipsDefinitionServiceMock
