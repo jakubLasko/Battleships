@@ -43,7 +43,12 @@ namespace Battleships.Storages
             openGames = new ConcurrentDictionary<Guid, Game>();
 
             // Set expiration so we don't have any lingering games in memory
-            cacheOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromHours(2));
+            cacheOptions = new MemoryCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromHours(2))
+                .RegisterPostEvictionCallback((key ,value, reason, state) =>
+                {
+                    logger.LogDebug($"Game {key} evicted from cache due to {reason}.");
+                });
         }
 
         /// <summary>

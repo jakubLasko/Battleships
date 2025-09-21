@@ -42,6 +42,10 @@ namespace Battleships.Controllers
         /// <param name="cancellationToken">The cancellation token used to prevent hanging.</param>
         [HttpPost]
         [ActionName("game/create")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<GameCreatedResult>> CreateGameAsync([FromBody] GameCreateData data, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(data);
@@ -82,6 +86,10 @@ namespace Battleships.Controllers
         /// <param name="cancellationToken">Cancellation token.</param>
         [HttpPost]
         [ActionName("game/join")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<GameJoinedResult>> JoinGameAsync([FromBody] GameJoinData data, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(data);
@@ -132,6 +140,8 @@ namespace Battleships.Controllers
         /// </summary>
         [HttpGet]
         [ActionName("game/openGames")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<List<string>> GetOpenGames()
         {
             try
@@ -160,6 +170,10 @@ namespace Battleships.Controllers
         /// <param name="gameId">The unique identifier of the game.</param>
         [HttpGet]
         [ActionName("game/state/{gameId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<GameState> GetState([FromRoute][Required] string gameId)
         {
             ArgumentNullException.ThrowIfNull(gameId);
@@ -195,6 +209,10 @@ namespace Battleships.Controllers
         /// <returns>ShotResult with result of the shot and game state.</returns>
         [HttpPut]
         [ActionName("game/shoot")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<ShotResult> Shoot([FromBody] ShootData data)
         {
             ArgumentNullException.ThrowIfNull(data);

@@ -2,10 +2,9 @@
 
 There are 2 tagged version in GIT
 	- Initial version: 0.0.1 - Basic implementation but should fully comply with requirements.
-	- New version: 0.0.2 - Added more realistic usecase for Creating/Joining games and querying game state.
+	- New version: 0.0.2 - Added more realistic usecase for Creating/Joining games, Shoot verification and querying game state.
 
 BattleshipsController
-	- Improvement: Adding method to get all open games would be useful for players to join existing games.
 	- CreateGameAsync/JoinGameAsync
 		- Since it contains some I/O bound operations, it is marked as async. To make it responsive and not block the thread.
 	- Shoot
@@ -29,4 +28,5 @@ General
 		more efficient to send smaller data types so responses are smaller.
 	- Improvement: Currently there is no handlig of player quitting the game. With that games don't become open again or client is not notified that
 		opponent has left the game. This can be handled with WebSocket or SignalR.
+	- Improvement: General polling and caching to avoid repeated calculations and improve performance.
 		
