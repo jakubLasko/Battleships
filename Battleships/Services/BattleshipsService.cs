@@ -45,7 +45,7 @@ namespace Battleships.Services
         /// </summary>
         /// <param name="data">The configuration data for the game.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
-        public async Task<Game> StartGameAsync(GameStartData data, CancellationToken cancellationToken)
+        public async Task<Game> CreateGameAsync(GameCreateData data, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(data);
 
@@ -66,23 +66,77 @@ namespace Battleships.Services
                 logger.LogDebug("Initializing new game instance.");
 
                 Game game = new Game();
-                game.Initialize(data.Player, data.Opponent, new Vector2(data.BoardSizeX, data.BoardSizeY), shipDefinitions);
+                game.Initialize(data.Player, new Vector2(data.BoardSizeX, data.BoardSizeY), shipDefinitions);
 
                 logger.LogDebug($"Initialization of game {game.Id} finished.");
 
                 gameStorage.AddGame(game);
 
-                logger.LogDebug($"Starting game {game.Id}.");
-
-                game.Start();
-
-                logger.LogDebug($"Game {game.Id} started successfully.");
+                logger.LogDebug($"Waiting for opponent for game {game.Id}.");
 
                 return game;
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to start new game.");
+                throw;
+            }
+        }
+
+        public async Task<Game> JoinGameAsync(Guid gameId, Player player, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(gameId);
+            ArgumentNullException.ThrowIfNull(player);
+
+            logger.LogDebug($"Joining game {gameId}.");
+
+            try
+            {
+                logger.LogDebug("Loading ship templates.");
+
+                var shipDefinitions = await shipsDefinitionService.LoadShipDefinitionsAsync(cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (shipDefinitions.Any(s => s.Shape.Count == 0))
+                    throw new ArgumentException("Invalid ship template - empty shape");
+
+                logger.LogDebug($"Ship templates loaded: {shipDefinitions.Count}");
+
+                logger.LogDebug($"Retrieving game {gameId} from storage.");
+
+                Game game = gameStorage.GetGame(gameId);
+
+                logger .LogDebug($"Game {gameId} retrieved. Joining player {player.Name}.");
+
+                game.Join(player, shipDefinitions);
+
+                logger.LogDebug($"Player {player.Name} joined game {gameId}. Game is now ready.");
+
+                return game;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Failed to join game {gameId}.");
+                throw;
+            }
+        }
+
+        public Game GetGame(Guid gameId)
+        {
+            ArgumentNullException.ThrowIfNull(gameId);
+
+            logger.LogDebug($"Retrieving game {gameId} from storage.");
+
+            try
+            {
+                Game game = gameStorage.GetGame(gameId);
+                logger.LogDebug($"Game {gameId} retrieved successfully.");
+
+                return game;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Failed to retrieve game {gameId}.");
                 throw;
             }
         }

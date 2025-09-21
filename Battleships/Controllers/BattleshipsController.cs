@@ -1,5 +1,6 @@
 ﻿using Battleships.Models;
 using Battleships.Models.DataTypes;
+using Battleships.Models.Enums;
 using Battleships.Models.GameIO;
 using Battleships.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -27,8 +28,8 @@ namespace Battleships.Controllers
         /// <param name="cancellationToken">The cancellation token used to prevent hanging.</param>
         /// <returns></returns>
         [HttpPost]
-        [ActionName("game/start")]
-        public async Task<ActionResult<GameCreatedResult>> StartGameAsync([FromBody] GameStartData data, CancellationToken cancellationToken)
+        [ActionName("game/create")]
+        public async Task<ActionResult<GameCreatedResult>> CreateGameAsync([FromBody] GameCreateData data, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(data);
 
@@ -38,15 +39,9 @@ namespace Battleships.Controllers
                 return BadRequest("First player is required and must have a name.");
             }
 
-            if (data.Opponent is null || string.IsNullOrWhiteSpace(data.Opponent.Name))
-            {
-                logger.LogError("Second player is missing or has no name.");
-                return BadRequest("Second player is required and must have a name.");
-            }
-
             try
             {
-                Game game = await battleshipsService.StartGameAsync(data, cancellationToken);
+                Game game = await battleshipsService.CreateGameAsync(data, cancellationToken);
                 if (game == null)
                 {
                     logger.LogError("Game creation failed.");
@@ -64,6 +59,83 @@ namespace Battleships.Controllers
             {
                 logger.LogError(ex, "Exception occurred while starting a new game.");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while starting the game.");
+            }
+        }
+
+        [HttpPost]
+        [ActionName("game/join/{gameId}")]
+        public async Task<ActionResult<GameJoinedResult>> JoinGameAsync([FromBody] GameJoinData data, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(data);
+
+            if (data.Player is null || string.IsNullOrWhiteSpace(data.Player.Name))
+            {
+                logger.LogError("First player is missing or has no name.");
+                return BadRequest("First player is required and must have a name.");
+            }
+
+            try
+            {
+                if (!Guid.TryParse(data.GameId, out Guid gameId))
+                {
+                    logger.LogError($"Invalid game ID format: {gameId}");
+                    return BadRequest("Invalid game ID format");
+                }
+
+                Game game = await battleshipsService.JoinGameAsync(gameId, data.Player, cancellationToken);
+                if (game == null)
+                {
+                    logger.LogError("Game join failed.");
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Failed to join game.");
+                }
+
+                logger.LogDebug($"Starting game {game.Id}.");
+
+                game.Start();
+
+                logger.LogDebug($"Game {game.Id} started successfully.");
+
+                return Ok(new GameJoinedResult() { GameId = gameId.ToString() });
+            }
+            catch (OperationCanceledException)
+            {
+                logger.LogError("Game join was canceled.");
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, "Game join was canceled.");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Exception occurred while joining the game.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while joining the game.");
+            }
+        }
+
+        [HttpGet]
+        [ActionName("game/state/{gameId}")]
+        public ActionResult<GameState> GetState([FromRoute][Required] string gameId)
+        {
+            ArgumentNullException.ThrowIfNull(gameId);
+
+            try
+            {
+                if (!Guid.TryParse(gameId, out Guid gameGuid))
+                {
+                    logger.LogError($"Invalid game ID format: {gameId}");
+                    return BadRequest("Invalid game ID format");
+                }
+
+                var game = battleshipsService.GetGame(gameGuid);
+                if (game == null)
+                {
+                    logger.LogError($"Game not found: {gameGuid}");
+                    return NotFound("Game not found");
+                }
+
+                return Ok(game.State);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error retrieving game state");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the game state");
             }
         }
 

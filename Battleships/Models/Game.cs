@@ -55,6 +55,8 @@ namespace Battleships.Models
         /// </summary>
         public bool IsInitialized { get; private set; }
 
+        private Vector2 boardSize;
+
         /// <summary>
         /// Initializes the game with the specified players, board size, and ship definitions.  
         /// </summary>
@@ -62,27 +64,41 @@ namespace Battleships.Models
         /// <param name="opponent">The opponent.</param>
         /// <param name="boardSize">The size of the game board.</param>
         /// <param name="shipDefinitions">A list of ship definitions.</param>
-        public void Initialize(Player player, Player opponent, Vector2 boardSize, List<ShipDefinition> shipDefinitions)
+        public void Initialize(Player player, Vector2 boardSize, List<ShipDefinition> shipDefinitions)
         {
             if (State != GameState.NotStarted)
                 throw new InvalidOperationException("Game has already been initialized");
 
             Player = player ?? throw new ArgumentNullException(nameof(player));
-            Opponent = opponent ?? throw new ArgumentNullException(nameof(opponent));
 
             // Prepare Player board
+            this.boardSize = boardSize;
             PlayerBoard = new Board(boardSize);
             PlayerBoard.PlaceShipsRandomly(shipDefinitions);
-
-            // Prepare Opponent board
-            OpponentBoard = new Board(boardSize);
-            OpponentBoard.PlaceShipsRandomly(shipDefinitions);
 
             // Set initial turn
             CurrentTurn = 1;
             PlayerOnTurn = Player;
 
             IsInitialized = true;
+            State = GameState.WaitingForOpponent;
+        }
+
+        public void Join(Player opponent, List<ShipDefinition> shipDefinitions)
+        {
+            if (!IsInitialized)
+                throw new InvalidOperationException("Game must be initialized before start.");
+
+            if (State != GameState.WaitingForOpponent)
+                throw new InvalidOperationException("Game has already started or finished.");
+
+            Opponent = opponent ?? throw new ArgumentNullException(nameof(opponent));
+
+            // Prepare Opponent board
+            OpponentBoard = new Board(boardSize);
+            OpponentBoard.PlaceShipsRandomly(shipDefinitions);
+
+            State = GameState.Ready;
         }
 
         /// <summary>
@@ -93,7 +109,7 @@ namespace Battleships.Models
             if (!IsInitialized)
                 throw new InvalidOperationException("Game must be initialized before start.");
 
-            if (State != GameState.NotStarted)
+            if (State != GameState.Ready)
                 throw new InvalidOperationException("Game has already started or finished");
 
             State = GameState.InProgress;

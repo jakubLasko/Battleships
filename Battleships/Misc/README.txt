@@ -1,7 +1,12 @@
 ﻿Here I explain some of the design decisions, possible improvements, and the reasoning behind certain choices made in the codebase.
 
+There are 2 tagged version in GIT
+	- Initial version: 0.0.1 - Basic implementation but should fully comply with requirements.
+	- New version: 0.0.2 - Added more realistic usecase for Creating/Joining games and querying game state.
+
 BattleshipsController
-	- StartGameAsync
+	- Improvement: Adding method to get all open games would be useful for players to join existing games.
+	- CreateGameAsync/JoinGameAsync
 		- Since it contains some I/O bound operations, it is marked as async. To make it responsive and not block the thread.
 	- Shoot
 		- This method is synchronous because it performs quick operations that do not involve I/O-bound tasks, ensuring low latency for user interactions.

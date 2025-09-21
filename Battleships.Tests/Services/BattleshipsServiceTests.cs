@@ -44,7 +44,7 @@ namespace Battleships.Tests.Services
         [Test]
         public async Task StartGameAsyncTest()
         {
-            var gameStartData = new GameStartData
+            var gameStartData = new GameCreateData
             {
                 Player = new Player("Player1"),
                 Opponent = new Player("Player2"),
@@ -52,7 +52,7 @@ namespace Battleships.Tests.Services
                 BoardSizeY = 10
             };
 
-            var result = await service.StartGameAsync(gameStartData, CancellationToken.None);
+            var result = await service.CreateGameAsync(gameStartData, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.Multiple(() =>
@@ -68,7 +68,7 @@ namespace Battleships.Tests.Services
         [Test]
         public void StartGameAsyncEmptyTest()
         {
-            Assert.ThrowsAsync<ArgumentNullException>(async () => await service.StartGameAsync(default, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(async () => await service.CreateGameAsync(default, CancellationToken.None));
         }
 
         [Test]

@@ -6,14 +6,13 @@ namespace Battleships.Models.GameIO
     /// Data required to start a new game of Battleships.
     /// Immutable struct.
     /// </summary>
-    public struct GameStartData
+    public struct GameCreateData
     {
         /// <summary>
         /// Gets the player.
         /// Required property.
         /// </summary>
         required public Player Player { get; init; }
-        required public Player Opponent { get; init; }
 
         /// <summary>
         /// Gets the opponent.

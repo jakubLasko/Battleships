@@ -13,7 +13,11 @@ namespace Battleships.Services.Interfaces
         /// </summary>
         /// <param name="data">The data required to initialize the game.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
-        public Task<Game> StartGameAsync(GameStartData data, CancellationToken cancellationToken);
+        public Task<Game> CreateGameAsync(GameCreateData data, CancellationToken cancellationToken);
+
+        public Task<Game> JoinGameAsync(Guid gameId, Player player, CancellationToken cancellationToken);
+
+        public Game GetGame(Guid gameId);
 
         /// <summary>
         /// Executes a shot based on the provided data and returns the result of the shot.
