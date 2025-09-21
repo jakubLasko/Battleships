@@ -48,7 +48,7 @@ namespace Battleships.Controllers
                     return StatusCode(StatusCodes.Status500InternalServerError, "Failed to create game.");
                 }
 
-                return Ok(new GameCreatedResult() { GameId = game.Id.ToString() });
+                return Ok(new GameCreatedResult() { GameId = game.Id.ToString(), PlayerId = game.Player.Id.ToString() });
             }
             catch (OperationCanceledException)
             {
@@ -95,7 +95,7 @@ namespace Battleships.Controllers
 
                 logger.LogDebug($"Game {game.Id} started successfully.");
 
-                return Ok(new GameJoinedResult() { GameId = gameId.ToString() });
+                return Ok(new GameJoinedResult() { GameId = gameId.ToString(), PlayerId = game.Opponent.Id.ToString() });
             }
             catch (OperationCanceledException)
             {

@@ -10,5 +10,7 @@
         /// Gets the unique identifier of the game.
         /// </summary>
         required public string GameId { get; init; }
+
+        required public string PlayerId { get; init; }
     }
 }
