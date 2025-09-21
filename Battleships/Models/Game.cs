@@ -58,10 +58,9 @@ namespace Battleships.Models
         private Vector2 boardSize;
 
         /// <summary>
-        /// Initializes the game with the specified players, board size, and ship definitions.  
+        /// Initializes the game with the specified player, board size, and ship definitions.  
         /// </summary>
         /// <param name="player">The player.</param>
-        /// <param name="opponent">The opponent.</param>
         /// <param name="boardSize">The size of the game board.</param>
         /// <param name="shipDefinitions">A list of ship definitions.</param>
         public void Initialize(Player player, Vector2 boardSize, List<ShipDefinition> shipDefinitions)
@@ -84,6 +83,11 @@ namespace Battleships.Models
             State = GameState.WaitingForOpponent;
         }
 
+        /// <summary>
+        /// Joins the game and initializes opponent board with the specified ships.
+        /// </summary>
+        /// <param name="opponent">The opponent.</param>
+        /// <param name="shipDefinitions">A list of ship definitions.</param>
         public void Join(Player opponent, List<ShipDefinition> shipDefinitions)
         {
             if (!IsInitialized)

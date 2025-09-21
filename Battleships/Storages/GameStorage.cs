@@ -26,6 +26,9 @@ namespace Battleships.Storages
         /// </summary>
         private readonly MemoryCacheEntryOptions cacheOptions;
 
+        /// <summary>
+        /// A thread-safe collection that stores the currently open games, keyed by their unique identifier.
+        /// </summary>
         private readonly ConcurrentDictionary<Guid, Game> openGames;
 
         /// <summary>
@@ -65,6 +68,7 @@ namespace Battleships.Storages
 
         /// <summary>
         /// Adds a game to the storage cache.
+        /// If game state is WaitingForOpponent, it is also added to the open games list.
         /// </summary>
         /// <param name="game">The game to be added into the storage.</param>
         public void AddGame(Game game)
@@ -84,6 +88,7 @@ namespace Battleships.Storages
 
         /// <summary>
         /// Removes the game with the specified identifier from the storage.
+        /// Also removes it from the open games list if present.
         /// </summary>
         /// <param name="gameId">The unique identifier of the game to remove.</param>
         public bool RemoveGame(Guid gameId)
@@ -96,6 +101,10 @@ namespace Battleships.Storages
             return true;
         }
 
+        /// <summary>
+        /// Removes the specified game from the list of open games.
+        /// </summary>
+        /// <param name="gameId">The unique identifier of the game to remove.</param>
         public bool RemoveOpenGame(Guid gameId)
         {
             if (openGames.TryRemove(gameId, out _))
@@ -110,6 +119,9 @@ namespace Battleships.Storages
             }
         }
 
+        /// <summary>
+        /// Retrieves a list of all currently open games.
+        /// </summary>
         public List<Game> GetOpenGames()
         {
             return openGames.Values.ToList();

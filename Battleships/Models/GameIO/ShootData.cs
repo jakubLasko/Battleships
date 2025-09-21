@@ -14,7 +14,7 @@ namespace Battleships.Models.GameIO
         required public string GameId { get; init; }
 
         /// <summary>
-        /// Gets the player performing the shot.
+        /// Gets the player's ID performing the shot.
         /// </summary>
         required public string PlayerId { get; init; }
 

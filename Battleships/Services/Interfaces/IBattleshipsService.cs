@@ -10,16 +10,29 @@ namespace Battleships.Services.Interfaces
     public interface IBattleshipsService
     {
         /// <summary>
-        /// Starts a new game asynchronously using the specified game start data.
+        /// Asynchronously creates a new game using the specified game start data.
         /// </summary>
-        /// <param name="data">The data required to initialize the game.</param>
+        /// <param name="data">The data required to create the game.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         public Task<Game> CreateGameAsync(GameCreateData data, CancellationToken cancellationToken);
 
+        /// <summary>
+        /// Asynchronously joins an existing game with the specified player.
+        /// </summary>
+        /// <param name="gameId">The unique identifier of the game to join.</param>
+        /// <param name="player">The player attempting to join the game.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         public Task<Game> JoinGameAsync(Guid gameId, Player player, CancellationToken cancellationToken);
 
+        /// <summary>
+        /// Retrieves the game associated with the gameId.
+        /// </summary>
+        /// <param name="gameId">The unique identifier of the game to retrieve.</param>
         public Game GetGame(Guid gameId);
 
+        /// <summary>
+        /// Retrieves a list of games that are currently open and available to join.
+        /// </summary>
         public List<Game> GetOpenGames();
 
         /// <summary>

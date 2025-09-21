@@ -41,7 +41,7 @@ namespace Battleships.Services
         }
 
         /// <summary>
-        /// Asynchronously starts a new game.
+        /// Asynchronously creates a new game.
         /// </summary>
         /// <param name="data">The configuration data for the game.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
@@ -83,6 +83,12 @@ namespace Battleships.Services
             }
         }
 
+        /// <summary>
+        /// Asynchronously joins a player to an existing game.
+        /// </summary>
+        /// <param name="gameId">The unique identifier of the game to join.</param>
+        /// <param name="player">The player attempting to join the game.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         public async Task<Game> JoinGameAsync(Guid gameId, Player player, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(gameId);
@@ -125,6 +131,9 @@ namespace Battleships.Services
             }
         }
 
+        /// <summary>
+        /// Retrieves a list of games that are currently open and available to join.
+        /// </summary>
         public List<Game> GetOpenGames()
         {
             try
@@ -144,6 +153,10 @@ namespace Battleships.Services
             }
         }
 
+        /// <summary>
+        /// Retrieves a game by its unique identifier.
+        /// </summary>
+        /// <param name="gameId">The unique identifier of the game to retrieve.</param>
         public Game GetGame(Guid gameId)
         {
             ArgumentNullException.ThrowIfNull(gameId);

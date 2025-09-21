@@ -1,6 +1,5 @@
 ﻿
 using Battleships.Models.Enums;
-using System.ComponentModel.DataAnnotations;
 
 namespace Battleships.Models.GameIO
 {

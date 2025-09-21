@@ -1,5 +1,4 @@
 ﻿using Battleships.Models;
-using Battleships.Models.DataTypes;
 using Battleships.Models.Enums;
 using Battleships.Models.GameIO;
 using Battleships.Services.Interfaces;
@@ -8,13 +7,28 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Battleships.Controllers
 {
+    /// <summary>
+    /// Provides endpoints for managing and interacting with Battleships games.
+    /// </summary>
     [Route("api/[controller]/[action]")]
     [ApiController]
     public class BattleshipsController : ControllerBase
     {
+        /// <summary>
+        /// A logger used to log messages and events.
+        /// </summary>
         private readonly ILogger<BattleshipsController> logger;
+
+        /// <summary>
+        /// Main service used to interact with game logic.
+        /// </summary>
         private readonly IBattleshipsService battleshipsService;
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        /// <param name="logger">The logger used to log messages and events.</param>
+        /// <param name="battleshipsService">The service used to interact with game logic</param>
         public BattleshipsController(ILogger<BattleshipsController> logger, IBattleshipsService battleshipsService)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -22,11 +36,10 @@ namespace Battleships.Controllers
         }
 
         /// <summary>
-        /// Stars a new game of Battleships.
+        /// Creates a new game of Battleships.
         /// </summary>
-        /// <param name="data">GameStartData required for starting a new game.</param>
+        /// <param name="data">GameStartData required for creating a new game.</param>
         /// <param name="cancellationToken">The cancellation token used to prevent hanging.</param>
-        /// <returns></returns>
         [HttpPost]
         [ActionName("game/create")]
         public async Task<ActionResult<GameCreatedResult>> CreateGameAsync([FromBody] GameCreateData data, CancellationToken cancellationToken)
@@ -62,8 +75,13 @@ namespace Battleships.Controllers
             }
         }
 
+        /// <summary>
+        /// Joins already existing game.
+        /// </summary>
+        /// <param name="data">The data required to join the game.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         [HttpPost]
-        [ActionName("game/join/{gameId}")]
+        [ActionName("game/join")]
         public async Task<ActionResult<GameJoinedResult>> JoinGameAsync([FromBody] GameJoinData data, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(data);
@@ -109,6 +127,9 @@ namespace Battleships.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves a list of open game IDs.
+        /// </summary>
         [HttpGet]
         [ActionName("game/openGames")]
         public ActionResult<List<string>> GetOpenGames()
@@ -116,6 +137,11 @@ namespace Battleships.Controllers
             try
             {
                 List<Game> openGames = battleshipsService.GetOpenGames();
+                if (openGames == null)
+                {
+                    logger.LogError("GetOpenGames service call returned null.");
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Failed to get open games.");
+                }
 
                 List<string> openGameIds = openGames.Select(x => x.Id.ToString()).ToList();
 
@@ -128,6 +154,10 @@ namespace Battleships.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves the current state of the specified game.
+        /// </summary>
+        /// <param name="gameId">The unique identifier of the game.</param>
         [HttpGet]
         [ActionName("game/state/{gameId}")]
         public ActionResult<GameState> GetState([FromRoute][Required] string gameId)
@@ -161,8 +191,7 @@ namespace Battleships.Controllers
         /// <summary>
         /// Processes a shot attempt in the specified game at the given position.
         /// </summary>
-        /// <param name="gameId">The unique identifier of the game.</param>
-        /// <param name="position">The coordinates of the shot. Must be within the valid board boundaries.</param>
+        /// <param name="data">The data required to make a shot.</param>
         /// <returns>ShotResult with result of the shot and game state.</returns>
         [HttpPut]
         [ActionName("game/shoot")]
