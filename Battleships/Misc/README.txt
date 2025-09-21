@@ -17,4 +17,6 @@ Tests
 General
 	- There is eternal discussion about vars vs explicit types. I used some vars where it was obvious what type it is, otherwise I used explicit types.
 		With codestyle config it can be enforced and I don't mind eitherway.
+	- Improvement: Most entities can have ID with much smaller data type. Since we know how many entities can exist in the game, it would be
+		more efficient to send smaller data types so responses are smaller.
 		
