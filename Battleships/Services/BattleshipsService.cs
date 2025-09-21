@@ -165,37 +165,46 @@ namespace Battleships.Services
         }
 
         /// <summary>
-        /// Processes a shot and returns the result of the shot.
+        /// Processes a shot attempt by a player in the specified game at the given position.
         /// </summary>
-        /// <param name="data">The data representing the shot.</param>
-        /// <returns>A <see cref="ShotResult"/>Outcome of the shot, with states.</returns>
-        public ShotResult Shoot(ShootData data)
+        /// <param name="gameId">The unique identifier of the game.</param>
+        /// <param name="playerId">The unique identifier of the player attempting the shot.</param>
+        /// <param name="position">The coordinates of the shot within the game board.</param>
+        /// <returns>A <see cref="ShotResult"/> object representing the outcome of the shot.</returns>
+        public ShotResult Shoot(Guid gameId, Guid playerId, Vector2 position)
         {
             try
             {
-                Vector2 position = data.Position;
+                logger.LogDebug($"Processing shot at position {position} in game {gameId}.");
 
-                logger.LogDebug($"Processing shot at position {position} in game {data.GameId}.");
+                Game game = gameStorage.GetGame(gameId);
 
-                Game game = gameStorage.GetGame(data.GameId);
-                ShotResult result = game.Shoot(data.Position);
+                // Validate that it's the player's turn
+                if (game.PlayerOnTurn.Id != playerId)
+                {
+                    var errorMessage = $"Invalid turn. Player {game.PlayerOnTurn.Id} is on turn, but {playerId} attempted to shoot.";
+                    logger.LogWarning(errorMessage);
+                    throw new InvalidOperationException(errorMessage);
+                }
+
+                ShotResult result = game.Shoot(position);
 
                 if (game.State == GameState.Finished)
                 {
-                    logger.LogDebug($"Game {data.GameId} finished. Winner: {game.PlayerOnTurn.Name}");
+                    logger.LogDebug($"Game {gameId} finished. Winner: {game.PlayerOnTurn.Name}");
 
                     // Game cleanup
-                    gameStorage.RemoveGame(data.GameId);
+                    gameStorage.RemoveGame(gameId);
                 }
 
-                logger.LogDebug($"Shot processed: {result.State} at {position.X},{position.Y} in game {data.GameId}.");
+                logger.LogDebug($"Shot processed: {result.State} at {position.X},{position.Y} in game {gameId}.");
                 logger.LogDebug($"Player on turn: {game.PlayerOnTurn.Name}.");
 
                 return result;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Error processing shot in game {data.GameId}.");
+                logger.LogError(ex, $"Error processing shot in game {gameId}.");
                 throw;
             }
         }

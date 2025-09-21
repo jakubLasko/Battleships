@@ -165,32 +165,33 @@ namespace Battleships.Controllers
         /// <param name="position">The coordinates of the shot. Must be within the valid board boundaries.</param>
         /// <returns>ShotResult with result of the shot and game state.</returns>
         [HttpPut]
-        [ActionName("game/shoot/{gameId}")]
-        public ActionResult<ShotResult> Shoot([FromRoute][Required] string gameId, [FromBody][Required] Vector2 position)
+        [ActionName("game/shoot")]
+        public ActionResult<ShotResult> Shoot([FromBody] ShootData data)
         {
-            ArgumentNullException.ThrowIfNull(gameId);
-            ArgumentNullException.ThrowIfNull(position);
+            ArgumentNullException.ThrowIfNull(data);
 
             // Shoot can be sync since it does only quick operation on in-memory data
             try
             {
-                if (!Guid.TryParse(gameId, out Guid gameGuid))
+                if (!Guid.TryParse(data.GameId, out Guid gameGuid))
                 {
-                    logger.LogError($"Invalid game ID format: {gameId}");
+                    logger.LogError($"Invalid game ID format: {data.GameId}");
                     return BadRequest("Invalid game ID format");
                 }
 
-                ShotResult result = battleshipsService.Shoot(new ShootData()
-                { 
-                    GameId = gameGuid,
-                    Position = position
-                });
+                if (!Guid.TryParse(data.PlayerId, out Guid playerGuid))
+                {
+                    logger.LogError($"Invalid player ID format: {data.PlayerId}");
+                    return BadRequest("Invalid player ID format");
+                }
+
+                ShotResult result = battleshipsService.Shoot(gameGuid, playerGuid, data.Position);
 
                 return Ok(result);
             }
             catch (KeyNotFoundException)
             {
-                logger.LogError($"Game not found: {gameId}");
+                logger.LogError($"Game not found: {data.GameId}");
                 return NotFound("Game not found");
             }
             catch (InvalidOperationException ex)

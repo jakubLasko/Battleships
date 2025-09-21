@@ -141,8 +141,7 @@ namespace Battleships.Tests.Services
             var game = CreateGame();
             var waterCellPosition = Common.FindWaterCell(game.OpponentBoard.Grid);
 
-            var shootData = new ShootData() { GameId = game.Id, Position = waterCellPosition };
-            var result = service.Shoot(shootData);
+            var result = service.Shoot(game.Id, game.Player.Id, waterCellPosition);
 
             Assert.That(result.State, Is.EqualTo(ShotState.Water));
             Assert.That(result.GameState, Is.EqualTo(GameState.InProgress));
@@ -157,19 +156,21 @@ namespace Battleships.Tests.Services
             var game = CreateGame();
             var ship = game.OpponentBoard.Ships.First(x => !x.IsSunk);
 
-            var shootData = new ShootData()
-            {
-                GameId = game.Id,
-                Position = ship.Cells.First(c => !ship.Hits.Any(h => h == c))
-            };
-
-            var result = service.Shoot(shootData);
+            var result = service.Shoot(game.Id, game.Player.Id, ship.Cells.First(c => !ship.Hits.Any(h => h == c)));
 
             Assert.That(result.State, Is.EqualTo(ShotState.Hit));
             Assert.That(result.GameState, Is.EqualTo(GameState.InProgress));
 
             // Test continuation of turn
             Assert.That(game.PlayerOnTurn, Is.EqualTo(game.Player));
+        }
+
+        [Test]
+        public void ShootPlayerNotOnTurnTest()
+        {
+            var game = CreateGame();
+
+            Assert.Throws<InvalidOperationException>(() => service.Shoot(game.Id, game.Opponent.Id, new Vector2(0, 0)));
         }
 
         [Test]
@@ -181,10 +182,7 @@ namespace Battleships.Tests.Services
             foreach (var ship in game.OpponentBoard.Ships)
             {
                 foreach (var cell in ship.Cells)
-                {
-                    var shootData = new ShootData() { GameId = game.Id, Position = cell };
-                    shotResult = service.Shoot(shootData);
-                }
+                    shotResult = service.Shoot(game.Id, game.Player.Id, cell);
             }
 
             Assert.That(shotResult, Is.Not.EqualTo((ShotResult)default));
@@ -199,11 +197,7 @@ namespace Battleships.Tests.Services
             var game = CreateGame();
 
             // Player shoot a miss to switch turn to opponent
-            var playerShot = service.Shoot(new ShootData()
-            {
-                GameId = game.Id,
-                Position = Common.FindWaterCell(game.OpponentBoard.Grid)
-            });
+            var playerShot = service.Shoot(game.Id, game.Player.Id, Common.FindWaterCell(game.OpponentBoard.Grid));
 
             Assert.That(playerShot.State, Is.EqualTo(ShotState.Water));
             Assert.That(playerShot.GameState, Is.EqualTo(GameState.InProgress));
@@ -213,10 +207,7 @@ namespace Battleships.Tests.Services
             foreach (var ship in game.PlayerBoard.Ships)
             {
                 foreach (var cell in ship.Cells)
-                {
-                    var shootData = new ShootData() { GameId = game.Id, Position = cell };
-                    shotResult = service.Shoot(shootData);
-                }
+                    shotResult = service.Shoot(game.Id, game.Opponent.Id, cell);
             }
 
             Assert.That(shotResult, Is.Not.EqualTo((ShotResult)default));

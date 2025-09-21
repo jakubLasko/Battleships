@@ -1,4 +1,5 @@
 ﻿using Battleships.Models;
+using Battleships.Models.DataTypes;
 using Battleships.Models.GameIO;
 
 namespace Battleships.Services.Interfaces
@@ -24,7 +25,9 @@ namespace Battleships.Services.Interfaces
         /// <summary>
         /// Executes a shot based on the provided data and returns the result of the shot.
         /// </summary>
-        /// <param name="data">The data describing result of the shot.</param>
-        public ShotResult Shoot(ShootData data);
+        /// <param name="gameId">The unique identifier of the game.</param>
+        /// <param name="playerId">The unique identifier of the player taking the shot.</param>
+        /// <param name="position">The target position of the shot.</param>
+        public ShotResult Shoot(Guid gameId, Guid playerId, Vector2 position);
     }
 }
