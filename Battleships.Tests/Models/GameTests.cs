@@ -26,40 +26,35 @@ namespace Battleships.Tests.Models
         public void InitializeTest()
         {
             var game = new Game();
-            game.Initialize(player, opponent, boardSize, shipDefinitions);
+            game.Initialize(player, boardSize, shipDefinitions);
 
             Assert.Multiple(() =>
             {
                 Assert.That(game.IsInitialized, Is.True);
-                Assert.That(game.State, Is.EqualTo(GameState.NotStarted));
+                Assert.That(game.State, Is.EqualTo(GameState.WaitingForOpponent));
                 Assert.That(game.Player.Name, Is.EqualTo(player.Name));
-                Assert.That(game.Opponent.Name, Is.EqualTo(opponent.Name));
+                Assert.That(game.Opponent, Is.Null);
                 Assert.That(game.CurrentTurn, Is.EqualTo(1));
                 Assert.That(game.PlayerOnTurn, Is.EqualTo(game.Player));
                 Assert.That(game.PlayerBoard.Size, Is.EqualTo(boardSize));
-                Assert.That(game.OpponentBoard.Size, Is.EqualTo(boardSize));
+                Assert.That(game.OpponentBoard, Is.Null);
             });
         }
 
         [Test]
         public void StartTest()
         {
-            var game = new Game();
-            game.Initialize(player, opponent, boardSize, shipDefinitions);
+            var game = StartNewGame();
 
-            game.Start();
-
+            Assert.That(game.Opponent, Is.EqualTo(opponent));
+            Assert.That(game.OpponentBoard.Size, Is.EqualTo(boardSize));
             Assert.That(game.State, Is.EqualTo(GameState.InProgress));
         }
 
         [Test]
         public void SwitchTurnTest()
         {
-            var game = new Game();
-            game.Initialize(player, opponent, boardSize, shipDefinitions);
-            game.Start();
-
-            var initialPlayer = game.PlayerOnTurn;
+            var game = StartNewGame();
             int turn = game.CurrentTurn;
 
             game.SwitchTurn();
@@ -69,6 +64,17 @@ namespace Battleships.Tests.Models
                 Assert.That(game.PlayerOnTurn, Is.EqualTo(opponent));
                 Assert.That(game.CurrentTurn, Is.EqualTo(turn + 1));
             });
+        }
+
+        private Game StartNewGame()
+        {
+            var game = new Game();
+            game.Initialize(player, boardSize, shipDefinitions);
+            game.Join(opponent, shipDefinitions);
+
+            game.Start();
+
+            return game;
         }
     }
 }
