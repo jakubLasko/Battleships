@@ -45,6 +45,8 @@ namespace Battleships.Services
             }
             try
             {
+                logger.LogDebug($"Loading ship definitions from config file at path: {shipsConfigPath}.");
+
                 // Using guarantees disposal of the stream
                 await using FileStream fileStream = File.OpenRead(shipsConfigPath);
 
@@ -60,6 +62,8 @@ namespace Battleships.Services
                     logger.LogError($"No ship templates found in config file at path: {shipsConfigPath}.");
                     throw new Exception($"No ship templates found in config file at path: {shipsConfigPath}.");
                 }
+
+                logger.LogDebug($"Successfully loaded {shipTemplates.Count} ship definitions from config file.");
 
                 return shipTemplates;
             }

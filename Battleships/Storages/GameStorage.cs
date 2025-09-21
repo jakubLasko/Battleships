@@ -53,6 +53,8 @@ namespace Battleships.Storages
             if (game is null)
                 throw new InvalidOperationException($"Game {gameId} is null.");
 
+            logger.LogDebug($"Game {gameId} retrieved from storage.");
+
             return game;
         }
 

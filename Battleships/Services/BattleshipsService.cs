@@ -53,7 +53,7 @@ namespace Battleships.Services
 
             try
             {
-                logger.LogTrace("Loading ship templates.");
+                logger.LogDebug("Loading ship templates.");
 
                 var shipDefinitions = await shipsDefinitionService.LoadShipDefinitionsAsync(cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
@@ -61,22 +61,22 @@ namespace Battleships.Services
                 if (shipDefinitions.Any(s => s.Shape.Count == 0))
                     throw new ArgumentException("Invalid ship template - empty shape");
 
-                logger.LogTrace($"Ship templates loaded: {shipDefinitions.Count}");
+                logger.LogDebug($"Ship templates loaded: {shipDefinitions.Count}");
 
-                logger.LogTrace("Initializing new game instance.");
+                logger.LogDebug("Initializing new game instance.");
 
                 Game game = new Game();
                 game.Initialize(data.Player, data.Opponent, new Vector2(data.BoardSizeX, data.BoardSizeY), shipDefinitions);
 
-                logger.LogTrace($"Initialization of game {game.Id} finished.");
+                logger.LogDebug($"Initialization of game {game.Id} finished.");
 
                 gameStorage.AddGame(game);
 
-                logger.LogTrace($"Starting game {game.Id}.");
+                logger.LogDebug($"Starting game {game.Id}.");
 
                 game.Start();
 
-                logger.LogTrace($"Game {game.Id} started successfully.");
+                logger.LogDebug($"Game {game.Id} started successfully.");
 
                 return game;
             }
@@ -112,6 +112,7 @@ namespace Battleships.Services
                 }
 
                 logger.LogDebug($"Shot processed: {result.State} at {position.X},{position.Y} in game {data.GameId}.");
+                logger.LogDebug($"Player on turn: {game.PlayerOnTurn.Name}.");
 
                 return result;
             }
