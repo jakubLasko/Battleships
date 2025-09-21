@@ -8,6 +8,10 @@ using NLog.Web;
 
 public class Program
 {
+    /// <summary>
+    /// The entry point of the application. Configures and starts the web application.
+    /// </summary>
+    /// <param name="args">The command-line arguments passed to the application.</param>
     public static void Main(string[] args)
     {
         var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();

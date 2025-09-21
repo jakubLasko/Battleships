@@ -7,12 +7,32 @@ using Battleships.Storages.Interfaces;
 
 namespace Battleships.Services
 {
+    /// <summary>
+    /// Provides functionality for main game mechanics.
+    /// </summary>
     public class BattleshipsService : IBattleshipsService
     {
+        /// <summary>
+        /// A logger used to log messages and events.
+        /// </summary>
         private readonly ILogger<BattleshipsService> logger;
+
+        /// <summary>
+        /// Provides access to ship definitions and related operations.
+        /// </summary>
         private readonly IShipsDefinitionService shipsDefinitionService;
+
+        /// <summary>
+        /// A Storage used to store and retrieve games.
+        /// </summary>
         private readonly IGameStorage gameStorage;
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        /// <param name="logger">The logger used to log messages and events.</param>
+        /// <param name="shipsDefinitionService">The service for getting ship definitions.</param>
+        /// <param name="gameStorage">The storage for storing and retreiving games.</param>
         public BattleshipsService(ILogger<BattleshipsService> logger, IShipsDefinitionService shipsDefinitionService, IGameStorage gameStorage)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -20,6 +40,11 @@ namespace Battleships.Services
             this.gameStorage = gameStorage ?? throw new ArgumentNullException(nameof(gameStorage));
         }
 
+        /// <summary>
+        /// Asynchronously starts a new game.
+        /// </summary>
+        /// <param name="data">The configuration data for the game.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         public async Task<Game> StartGameAsync(GameStartData data, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(data);
@@ -62,6 +87,11 @@ namespace Battleships.Services
             }
         }
 
+        /// <summary>
+        /// Processes a shot and returns the result of the shot.
+        /// </summary>
+        /// <param name="data">The data representing the shot.</param>
+        /// <returns>A <see cref="ShotResult"/>Outcome of the shot, with states.</returns>
         public ShotResult Shoot(ShootData data)
         {
             try

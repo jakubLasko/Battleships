@@ -5,11 +5,26 @@ using System.Text.Json;
 
 namespace Battleships.Services
 {
+    /// <summary>
+    /// Provides functionality for loading ship definitions from a configuration file.
+    /// </summary>
     public class ShipsDefinitionService : IShipsDefinitionService
     {
+        /// <summary>
+        /// A logger used to log messages and events.
+        /// </summary>
         private readonly ILogger<ShipsDefinitionService> logger;
+
+        /// <summary>
+        /// Represents the application settings configuration options.
+        /// </summary>
         private readonly IOptions<AppSettings> appSettings;
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        /// <param name="logger">The logger used to log messages and events.</param>
+        /// <param name="appSettings">The application settings containing configuration values for the service.</param>
         public ShipsDefinitionService(ILogger<ShipsDefinitionService> logger, IOptions<AppSettings> appSettings)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -17,13 +32,9 @@ namespace Battleships.Services
         }
 
         /// <summary>
-        /// 
+        /// Asynchronously loads a list of ship definitions from a JSON configuration file.
         /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        /// <exception cref="FileNotFoundException"></exception>
-        /// Note: This is wasteful since we have to read and deserialize the file every time.
-        /// Better approach would be to read it once and cache the result, but this is simpler for now.
+        /// <param name="cancellationToken">Cancellation token.</param>
         public async Task<List<ShipDefinition>> LoadShipDefinitionsAsync(CancellationToken cancellationToken)
         {
             var shipsConfigPath = appSettings.Value.ShipsDefinitionPath;
