@@ -1,19 +1,19 @@
 ﻿namespace Battleships.Models.GameIO
 {
     /// <summary>
-    /// Represents the result of creating a new game.
+    /// Represents the data required for a player to join a game.
     /// Immutable struct.
     /// </summary>
-    public struct GameCreatedResult
+    public struct GameJoinData
     {
         /// <summary>
-        /// Gets the unique identifier of the game.
+        /// Gets the unique identifier for the game.
         /// </summary>
         required public string GameId { get; init; }
 
         /// <summary>
-        /// Gets the unique identifier for the player.
+        /// Gets the player.
         /// </summary>
-        required public string PlayerId { get; init; }
+        required public Player Player { get; init; }
     }
 }

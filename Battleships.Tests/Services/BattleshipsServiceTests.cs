@@ -42,33 +42,97 @@ namespace Battleships.Tests.Services
         }
 
         [Test]
-        public async Task StartGameAsyncTest()
+        public async Task CreateGameAsyncTest()
         {
-            var gameStartData = new GameStartData
+            var gameStartData = new GameCreateData
             {
                 Player = new Player("Player1"),
-                Opponent = new Player("Player2"),
                 BoardSizeX = 10,
                 BoardSizeY = 10
             };
 
-            var result = await service.StartGameAsync(gameStartData, CancellationToken.None);
+            var result = await service.CreateGameAsync(gameStartData, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.Multiple(() =>
             {
                 Assert.That(result.IsInitialized, Is.True);
-                Assert.That(result.State, Is.EqualTo(GameState.InProgress));
+                Assert.That(result.State, Is.EqualTo(GameState.WaitingForOpponent));
                 Assert.That(result.PlayerBoard.Size.X, Is.EqualTo(gameStartData.BoardSizeX));
                 Assert.That(result.PlayerBoard.Size.Y, Is.EqualTo(gameStartData.BoardSizeY));
+                Assert.That(result.PlayerOnTurn, Is.EqualTo(result.Player));
             });
             gameStorageMock.Verify(x => x.AddGame(It.IsAny<Game>()), Times.Once);
         }
 
         [Test]
-        public void StartGameAsyncEmptyTest()
+        public void CreateGameAsyncEmptyTest()
         {
-            Assert.ThrowsAsync<ArgumentNullException>(async () => await service.StartGameAsync(default, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(async () => await service.CreateGameAsync(default, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task JoinGameAsyncTest()
+        {
+            var game = new Game();
+            game.Initialize(new Player("Player1"), new Vector2(10, 10), Common.GetShipDefinitions());
+
+            gameStorageMock
+                .Setup(x => x.GetGame(game.Id))
+                .Returns(game);
+
+            var opponent = new Player("Player2");
+            var result = await service.JoinGameAsync(game.Id, opponent, CancellationToken.None);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.IsInitialized, Is.True);
+                Assert.That(result.State, Is.EqualTo(GameState.Ready));
+                Assert.That(result.Opponent, Is.EqualTo(opponent));
+                Assert.That(result.OpponentBoard, Is.Not.Null);
+                Assert.That(result.OpponentBoard.Ships, Is.Not.Empty);
+            });
+        }
+
+        [Test]
+        public void JoinGameAsyncEmptyTest()
+        {
+            Assert.ThrowsAsync<ArgumentNullException>(async () => await service.CreateGameAsync(default, CancellationToken.None));
+        }
+
+        [Test]
+        public void JoinAlreadyFullGameTest()
+        {
+            var game = CreateGame();
+
+            gameStorageMock
+                .Setup(x => x.GetGame(game.Id))
+                .Returns(game);
+
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await service.JoinGameAsync(game.Id, new Player("Player3"), CancellationToken.None));
+        }
+
+        [Test]
+        public void GetGameTest()
+        {
+            var game = CreateGame();
+
+            gameStorageMock
+                .Setup(x => x.GetGame(game.Id))
+                .Returns(game);
+
+            var result = service.GetGame(game.Id);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result.Id, Is.EqualTo(game.Id));
+                Assert.That(result.State, Is.EqualTo(GameState.InProgress));
+                Assert.That(result.Player, Is.Not.Null);
+                Assert.That(result.Opponent, Is.Not.Null);
+            });
+
+            gameStorageMock.Verify(x => x.GetGame(game.Id), Times.Once);
         }
 
         [Test]
@@ -77,8 +141,7 @@ namespace Battleships.Tests.Services
             var game = CreateGame();
             var waterCellPosition = Common.FindWaterCell(game.OpponentBoard.Grid);
 
-            var shootData = new ShootData() { GameId = game.Id, Position = waterCellPosition };
-            var result = service.Shoot(shootData);
+            var result = service.Shoot(game.Id, game.Player.Id, waterCellPosition);
 
             Assert.That(result.State, Is.EqualTo(ShotState.Water));
             Assert.That(result.GameState, Is.EqualTo(GameState.InProgress));
@@ -93,19 +156,21 @@ namespace Battleships.Tests.Services
             var game = CreateGame();
             var ship = game.OpponentBoard.Ships.First(x => !x.IsSunk);
 
-            var shootData = new ShootData()
-            {
-                GameId = game.Id,
-                Position = ship.Cells.First(c => !ship.Hits.Any(h => h == c))
-            };
-
-            var result = service.Shoot(shootData);
+            var result = service.Shoot(game.Id, game.Player.Id, ship.Cells.First(c => !ship.Hits.Any(h => h == c)));
 
             Assert.That(result.State, Is.EqualTo(ShotState.Hit));
             Assert.That(result.GameState, Is.EqualTo(GameState.InProgress));
 
             // Test continuation of turn
             Assert.That(game.PlayerOnTurn, Is.EqualTo(game.Player));
+        }
+
+        [Test]
+        public void ShootPlayerNotOnTurnTest()
+        {
+            var game = CreateGame();
+
+            Assert.Throws<InvalidOperationException>(() => service.Shoot(game.Id, game.Opponent.Id, new Vector2(0, 0)));
         }
 
         [Test]
@@ -117,10 +182,7 @@ namespace Battleships.Tests.Services
             foreach (var ship in game.OpponentBoard.Ships)
             {
                 foreach (var cell in ship.Cells)
-                {
-                    var shootData = new ShootData() { GameId = game.Id, Position = cell };
-                    shotResult = service.Shoot(shootData);
-                }
+                    shotResult = service.Shoot(game.Id, game.Player.Id, cell);
             }
 
             Assert.That(shotResult, Is.Not.EqualTo((ShotResult)default));
@@ -135,11 +197,7 @@ namespace Battleships.Tests.Services
             var game = CreateGame();
 
             // Player shoot a miss to switch turn to opponent
-            var playerShot = service.Shoot(new ShootData()
-            {
-                GameId = game.Id,
-                Position = Common.FindWaterCell(game.OpponentBoard.Grid)
-            });
+            var playerShot = service.Shoot(game.Id, game.Player.Id, Common.FindWaterCell(game.OpponentBoard.Grid));
 
             Assert.That(playerShot.State, Is.EqualTo(ShotState.Water));
             Assert.That(playerShot.GameState, Is.EqualTo(GameState.InProgress));
@@ -149,10 +207,7 @@ namespace Battleships.Tests.Services
             foreach (var ship in game.PlayerBoard.Ships)
             {
                 foreach (var cell in ship.Cells)
-                {
-                    var shootData = new ShootData() { GameId = game.Id, Position = cell };
-                    shotResult = service.Shoot(shootData);
-                }
+                    shotResult = service.Shoot(game.Id, game.Opponent.Id, cell);
             }
 
             Assert.That(shotResult, Is.Not.EqualTo((ShotResult)default));
@@ -172,13 +227,12 @@ namespace Battleships.Tests.Services
             var shipDefinitions = shipsDefinitionServiceMock.Object.LoadShipDefinitionsAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var game = new Game();
-            game.Initialize(
-                new Player("Player1"),
-                new Player("Player2"),
-                new Vector2(10, 10),
-                shipDefinitions
-            );
+            game.Initialize(new Player("Player1"), new Vector2(10, 10), shipDefinitions);
 
+            // Join opponent
+            game.Join(new Player("Player2"), shipDefinitions);
+
+            // Start the game
             game.Start();
 
             gameStorageMock
