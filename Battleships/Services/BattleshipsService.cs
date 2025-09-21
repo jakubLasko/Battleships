@@ -112,11 +112,34 @@ namespace Battleships.Services
 
                 logger.LogDebug($"Player {player.Name} joined game {gameId}. Game is now ready.");
 
+                logger.LogDebug($"Removing open game {gameId} from storage");
+
+                gameStorage.RemoveOpenGame(gameId);
+
                 return game;
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, $"Failed to join game {gameId}.");
+                throw;
+            }
+        }
+
+        public List<Game> GetOpenGames()
+        {
+            try
+            {
+                logger.LogDebug("Retrieving open games from storage.");
+
+                List<Game> openGames = gameStorage.GetOpenGames();
+
+                logger.LogDebug($"Open games retrieved: {openGames.Count}");
+
+                return openGames;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to retrieve open games.");
                 throw;
             }
         }

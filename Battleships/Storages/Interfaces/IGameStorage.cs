@@ -1,4 +1,5 @@
 ﻿using Battleships.Models;
+using Battleships.Models.Enums;
 
 namespace Battleships.Storages.Interfaces
 {
@@ -24,5 +25,9 @@ namespace Battleships.Storages.Interfaces
         /// </summary>
         /// <param name="gameId">The unique identifier of the game to remove.</param>
         bool RemoveGame(Guid gameId);
+
+        List<Game> GetOpenGames();
+
+        bool RemoveOpenGame(Guid gameId);
     }
 }

@@ -19,6 +19,8 @@ namespace Battleships.Services.Interfaces
 
         public Game GetGame(Guid gameId);
 
+        public List<Game> GetOpenGames();
+
         /// <summary>
         /// Executes a shot based on the provided data and returns the result of the shot.
         /// </summary>

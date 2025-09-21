@@ -1,6 +1,8 @@
 ﻿using Battleships.Models;
+using Battleships.Models.Enums;
 using Battleships.Storages.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
+using System.Collections.Concurrent;
 
 namespace Battleships.Storages
 {
@@ -24,6 +26,8 @@ namespace Battleships.Storages
         /// </summary>
         private readonly MemoryCacheEntryOptions cacheOptions;
 
+        private readonly ConcurrentDictionary<Guid, Game> openGames;
+
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -33,6 +37,7 @@ namespace Battleships.Storages
         {
             this.cache = cache ?? throw new ArgumentNullException(nameof(cache));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            openGames = new ConcurrentDictionary<Guid, Game>();
 
             // Set expiration so we don't have any lingering games in memory
             cacheOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromHours(2));
@@ -67,6 +72,13 @@ namespace Battleships.Storages
             ArgumentNullException.ThrowIfNull(game);
 
             cache.Set(game.Id, game, cacheOptions);
+
+            if (game.State == GameState.WaitingForOpponent)
+            {
+                openGames.TryAdd(game.Id, game);
+                logger.LogDebug($"Game {game.Id} added to open games list.");
+            }
+
             logger.LogDebug($"Game {game.Id} added to storage.");
         }
 
@@ -77,9 +89,30 @@ namespace Battleships.Storages
         public bool RemoveGame(Guid gameId)
         {
             cache.Remove(gameId);
+            openGames.TryRemove(gameId, out _);
+
             logger.LogDebug($"Game {gameId} removed from storage.");
 
             return true;
+        }
+
+        public bool RemoveOpenGame(Guid gameId)
+        {
+            if (openGames.TryRemove(gameId, out _))
+            {
+                logger.LogDebug($"Game {gameId} removed from open games list.");
+                return true;
+            }
+            else
+            {
+                logger.LogError($"Attempted to remove game {gameId} from open games list, but it was not found.");
+                return false;
+            }
+        }
+
+        public List<Game> GetOpenGames()
+        {
+            return openGames.Values.ToList();
         }
     }
 }

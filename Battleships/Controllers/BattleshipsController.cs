@@ -110,6 +110,25 @@ namespace Battleships.Controllers
         }
 
         [HttpGet]
+        [ActionName("game/openGames")]
+        public ActionResult<List<string>> GetOpenGames()
+        {
+            try
+            {
+                List<Game> openGames = battleshipsService.GetOpenGames();
+
+                List<string> openGameIds = openGames.Select(x => x.Id.ToString()).ToList();
+
+                return Ok(openGameIds);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error retrieving open games");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving open games");
+            }
+        }
+
+        [HttpGet]
         [ActionName("game/state/{gameId}")]
         public ActionResult<GameState> GetState([FromRoute][Required] string gameId)
         {
