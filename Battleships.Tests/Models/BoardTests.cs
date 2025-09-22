@@ -45,6 +45,9 @@ namespace Battleships.Tests.Models
             var board = new Board(boardSize);
             board.PlaceShipsRandomly(shipDefinitions);
 
+            TestContext.WriteLine("Board after ship placement");
+            TestContext.WriteLine(Common.PrintBoard(board));
+
             Assert.Multiple(() =>
             {
                 Assert.That(board.Ships, Has.Count.EqualTo(shipDefinitions.Sum(x => x.Count)));

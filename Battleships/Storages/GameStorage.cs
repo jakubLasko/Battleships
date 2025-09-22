@@ -1,6 +1,8 @@
 ﻿using Battleships.Models;
+using Battleships.Models.Enums;
 using Battleships.Storages.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
+using System.Collections.Concurrent;
 
 namespace Battleships.Storages
 {
@@ -25,6 +27,11 @@ namespace Battleships.Storages
         private readonly MemoryCacheEntryOptions cacheOptions;
 
         /// <summary>
+        /// A thread-safe collection that stores the currently open games, keyed by their unique identifier.
+        /// </summary>
+        private readonly ConcurrentDictionary<Guid, Game> openGames;
+
+        /// <summary>
         /// Default constructor.
         /// </summary>
         /// <param name="cache">The memory cache used to store game data.</param>
@@ -33,9 +40,15 @@ namespace Battleships.Storages
         {
             this.cache = cache ?? throw new ArgumentNullException(nameof(cache));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            openGames = new ConcurrentDictionary<Guid, Game>();
 
             // Set expiration so we don't have any lingering games in memory
-            cacheOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromHours(2));
+            cacheOptions = new MemoryCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromHours(2))
+                .RegisterPostEvictionCallback((key ,value, reason, state) =>
+                {
+                    logger.LogDebug($"Game {key} evicted from cache due to {reason}.");
+                });
         }
 
         /// <summary>
@@ -60,6 +73,7 @@ namespace Battleships.Storages
 
         /// <summary>
         /// Adds a game to the storage cache.
+        /// If game state is WaitingForOpponent, it is also added to the open games list.
         /// </summary>
         /// <param name="game">The game to be added into the storage.</param>
         public void AddGame(Game game)
@@ -67,19 +81,55 @@ namespace Battleships.Storages
             ArgumentNullException.ThrowIfNull(game);
 
             cache.Set(game.Id, game, cacheOptions);
+
+            if (game.State == GameState.WaitingForOpponent)
+            {
+                openGames.TryAdd(game.Id, game);
+                logger.LogDebug($"Game {game.Id} added to open games list.");
+            }
+
             logger.LogDebug($"Game {game.Id} added to storage.");
         }
 
         /// <summary>
         /// Removes the game with the specified identifier from the storage.
+        /// Also removes it from the open games list if present.
         /// </summary>
         /// <param name="gameId">The unique identifier of the game to remove.</param>
         public bool RemoveGame(Guid gameId)
         {
             cache.Remove(gameId);
+            openGames.TryRemove(gameId, out _);
+
             logger.LogDebug($"Game {gameId} removed from storage.");
 
             return true;
+        }
+
+        /// <summary>
+        /// Removes the specified game from the list of open games.
+        /// </summary>
+        /// <param name="gameId">The unique identifier of the game to remove.</param>
+        public bool RemoveOpenGame(Guid gameId)
+        {
+            if (openGames.TryRemove(gameId, out _))
+            {
+                logger.LogDebug($"Game {gameId} removed from open games list.");
+                return true;
+            }
+            else
+            {
+                logger.LogError($"Attempted to remove game {gameId} from open games list, but it was not found.");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Retrieves a list of all currently open games.
+        /// </summary>
+        public List<Game> GetOpenGames()
+        {
+            return openGames.Values.ToList();
         }
     }
 }

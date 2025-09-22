@@ -24,5 +24,16 @@ namespace Battleships.Storages.Interfaces
         /// </summary>
         /// <param name="gameId">The unique identifier of the game to remove.</param>
         bool RemoveGame(Guid gameId);
+
+        /// <summary>
+        /// Retrieves a list of games that are currently open and available to join.
+        /// </summary>
+        List<Game> GetOpenGames();
+
+        /// <summary>
+        /// Removes an open game from the collection of available games.
+        /// </summary>
+        /// <param name="gameId">The unique identifier of the game to remove.</param>
+        bool RemoveOpenGame(Guid gameId);
     }
 }

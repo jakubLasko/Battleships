@@ -9,6 +9,8 @@ namespace Battleships.Models.Enums
     public enum GameState
     {
         NotStarted,
+        WaitingForOpponent,
+        Ready,
         InProgress,
         Finished
     }

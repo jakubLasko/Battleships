@@ -11,7 +11,12 @@ namespace Battleships.Models.GameIO
         /// <summary>
         /// Gets the unique identifier of the game.
         /// </summary>
-        required public Guid GameId { get; init; }
+        required public string GameId { get; init; }
+
+        /// <summary>
+        /// Gets the player's ID performing the shot.
+        /// </summary>
+        required public string PlayerId { get; init; }
 
         /// <summary>
         /// Gets the position of the object in a 2D space.
