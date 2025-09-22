@@ -10,56 +10,52 @@ namespace Battleships.Tests.Storages
     [TestFixture]
     public class GameStorageTests
     {
-        private Mock<IMemoryCache> cacheMock;
         private Mock<ILogger<GameStorage>> loggerMock;
 
         [SetUp]
         public void Setup()
         {
-            cacheMock = new Mock<IMemoryCache>();
             loggerMock = new Mock<ILogger<GameStorage>>();
         }
 
         [Test]
         public void CreationTest()
         {
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
             Assert.Throws<ArgumentNullException>(() => new GameStorage(null!, loggerMock.Object));
-            Assert.Throws<ArgumentNullException>(() => new GameStorage(cacheMock.Object, null!));
+            Assert.Throws<ArgumentNullException>(() => new GameStorage(memoryCache, null!));
 
-            var storage = CreateStorage();
+            var storage = new GameStorage(memoryCache, loggerMock.Object);
             Assert.IsNotNull(storage);
         }
 
         [Test]
         public void AddOpenGameTest()
         {
-            var storage = CreateStorage();
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var storage = new GameStorage(memoryCache, loggerMock.Object);
             var game = new Game();
             game.Initialize(new Player("Player1"), new Vector2(10, 10), Common.GetShipDefinitions());
 
-            var cacheEntry = new Mock<ICacheEntry>();
-            cacheMock.Setup(x => x.CreateEntry(It.IsAny<object>())).Returns(cacheEntry.Object);
-
             storage.AddGame(game);
             var openGames = storage.GetOpenGames();
+            var cachedGame = memoryCache.Get<Game>(game.Id);
 
             Assert.Multiple(() =>
             {
                 Assert.That(openGames, Has.Count.EqualTo(1));
                 Assert.That(openGames[0], Is.EqualTo(game));
+                Assert.That(cachedGame, Is.EqualTo(game));
             });
-            cacheMock.Verify(x => x.CreateEntry(game.Id), Times.Once);
         }
 
         [Test]
         public void RemoveOpenGameTest()
         {
-            var storage = CreateStorage();
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var storage = new GameStorage(memoryCache, loggerMock.Object);
             var game = new Game();
             game.Initialize(new Player("Player1"), new Vector2(10, 10), Common.GetShipDefinitions());
-
-            var cacheEntry = new Mock<ICacheEntry>();
-            cacheMock.Setup(x => x.CreateEntry(It.IsAny<object>())).Returns(cacheEntry.Object);
 
             storage.AddGame(game);
 
@@ -74,31 +70,23 @@ namespace Battleships.Tests.Storages
         }
 
         [Test]
-        public void RemoveGameTest()
+        public void GetGameTest()
         {
-            var storage = CreateStorage();
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var storage = new GameStorage(memoryCache, loggerMock.Object);
             var game = new Game();
             game.Initialize(new Player("Player1"), new Vector2(10, 10), Common.GetShipDefinitions());
 
-            var cacheEntry = new Mock<ICacheEntry>();
-            cacheMock.Setup(x => x.CreateEntry(It.IsAny<object>())).Returns(cacheEntry.Object);
-
             storage.AddGame(game);
 
-            var result = storage.RemoveGame(game.Id);
+            var result = storage.GetGame(game.Id);
             var openGames = storage.GetOpenGames();
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.True);
-                Assert.That(openGames, Is.Empty);
+                Assert.That(result, Is.EqualTo(game));
+                Assert.That(openGames, Is.Not.Empty);
             });
-            cacheMock.Verify(x => x.Remove(game.Id), Times.Once);
-        }
-
-        private GameStorage CreateStorage()
-        {
-            return new GameStorage(cacheMock.Object, loggerMock.Object);
         }
     }
 }
