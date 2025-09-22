@@ -19,6 +19,7 @@ ShipsDefinitionService
 
 Tests
 	- Base tests were implemented to cover the main functionalities of the game, including game creation, shooting mechanics, and some edge cases.
+	- ShipPlacementTest/PlayerWinTest/ShootShipTest/ShootWaterTest prints the game board to console for visual verification during testing.
 	- Improvement: Add more tests to unsure integrity of all logic pieces and robustness.
 
 General

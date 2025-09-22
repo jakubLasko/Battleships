@@ -2,6 +2,7 @@
 using Battleships.Models.DataTypes;
 using Battleships.Models.Enums;
 using Battleships.Models.GameSetup;
+using System.Text;
 
 namespace Battleships.Tests
 {
@@ -33,6 +34,51 @@ namespace Battleships.Tests
             }
 
             throw new InvalidOperationException("No water cell found on the board");
+        }
+
+        public static string PrintBoard(Board board)
+        {
+            var sb = new StringBuilder();
+
+            // Print column headers
+            sb.Append("   "); // Spacing for row numbers
+            for (int x = 0; x < board.Size.X; x++)
+            {
+                sb.Append($"{x,2} ");
+            }
+            sb.AppendLine();
+
+            // Print top border
+            sb.Append("  ╔");
+            sb.Append('═', board.Size.X * 3);
+            sb.AppendLine("╗");
+
+            // Print board content with row numbers
+            for (int y = 0; y < board.Size.Y; y++)
+            {
+                sb.Append($"{y,2}║");
+                for (int x = 0; x < board.Size.X; x++)
+                {
+                    var cell = board.Grid[x, y];
+                    char symbol = cell.State switch
+                    {
+                        CellState.Water => '·',
+                        CellState.Ship => '■',
+                        CellState.Miss => '○',
+                        CellState.Hit => '×',
+                        _ => '?'
+                    };
+                    sb.Append($" {symbol} ");
+                }
+                sb.AppendLine("║");
+            }
+
+            // Print bottom border
+            sb.Append("  ╚");
+            sb.Append('═', board.Size.X * 3);
+            sb.AppendLine("╝");
+
+            return sb.ToString();
         }
     }
 }

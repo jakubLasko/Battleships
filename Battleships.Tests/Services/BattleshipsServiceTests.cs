@@ -141,7 +141,13 @@ namespace Battleships.Tests.Services
             var game = CreateGame();
             var waterCellPosition = Common.FindWaterCell(game.OpponentBoard.Grid);
 
+            TestContext.WriteLine("Opponent board before shoot.");
+            TestContext.WriteLine(Common.PrintBoard(game.OpponentBoard));
+
             var result = service.Shoot(game.Id, game.Player.Id, waterCellPosition);
+
+            TestContext.WriteLine("Opponent board after shoot.");
+            TestContext.WriteLine(Common.PrintBoard(game.OpponentBoard));
 
             Assert.That(result.State, Is.EqualTo(ShotState.Water));
             Assert.That(result.GameState, Is.EqualTo(GameState.InProgress));
@@ -156,7 +162,13 @@ namespace Battleships.Tests.Services
             var game = CreateGame();
             var ship = game.OpponentBoard.Ships.First(x => !x.IsSunk);
 
+            TestContext.WriteLine("Opponent board before shoot.");
+            TestContext.WriteLine(Common.PrintBoard(game.OpponentBoard));
+
             var result = service.Shoot(game.Id, game.Player.Id, ship.Cells.First(c => !ship.Hits.Any(h => h == c)));
+
+            TestContext.WriteLine("Opponent board after shoot.");
+            TestContext.WriteLine(Common.PrintBoard(game.OpponentBoard));
 
             Assert.That(result.State, Is.EqualTo(ShotState.Hit));
             Assert.That(result.GameState, Is.EqualTo(GameState.InProgress));
@@ -178,12 +190,18 @@ namespace Battleships.Tests.Services
         {
             var game = CreateGame();
 
+            TestContext.WriteLine("Opponent board initial state.");
+            TestContext.WriteLine(Common.PrintBoard(game.OpponentBoard));
+
             ShotResult shotResult = default;
             foreach (var ship in game.OpponentBoard.Ships)
             {
                 foreach (var cell in ship.Cells)
                     shotResult = service.Shoot(game.Id, game.Player.Id, cell);
             }
+
+            TestContext.WriteLine("Opponent board at the end of the game.");
+            TestContext.WriteLine(Common.PrintBoard(game.OpponentBoard));
 
             Assert.That(shotResult, Is.Not.EqualTo((ShotResult)default));
             Assert.That(shotResult.State, Is.EqualTo(ShotState.ShipSunk));
